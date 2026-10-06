@@ -31,20 +31,22 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() verifies the access token locally (JWKS, cached) and only
+  // calls Supabase Auth when the token must be refreshed. Much faster than
+  // getUser(), which makes a network request on every navigation.
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
 
   if (pathname === "/admin/login") return response;
 
   const marker = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   const session = await verifyAdminSession(marker, env.SESSION_SECRET);
-  if (user && session && session.sub === user.id) return response;
+  if (userId && session && session.sub === userId) return response;
 
   const loginUrl = request.nextUrl.clone();
   loginUrl.pathname = "/admin/login";
   loginUrl.search = "";
-  const expired = Boolean(user && marker && !session);
+  const expired = Boolean(userId && marker && !session);
   if (expired) {
     loginUrl.searchParams.set("reason", "expired");
   } else {

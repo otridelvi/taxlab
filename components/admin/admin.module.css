@@ -160,3 +160,9 @@
   color: var(--color-ink-muted);
   font-size: 14px;
 }
+
+.loading {
+  padding: 24px 0;
+  color: var(--color-ink-muted);
+  font-size: 14px;
+}

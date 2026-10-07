@@ -123,13 +123,21 @@ test.describe("PLAN-02 · generate & participant list", () => {
       .update({ status: "in_progress", started_at: new Date().toISOString() })
       .eq("id", p.id);
 
-    const res = await page.request.patch(`/api/admin/participants/${p.id}/cell`, {
-      data: { cell: 1, reason: "mencoba ubah sel setelah mulai" },
-    });
-    expect(res.status()).toBe(409);
-    expect((await res.json()).error.code).toBe("CELL_LOCKED");
-    const { data } = await serviceClient().from("participants").select("cell").eq("id", p.id).single();
-    expect(data!.cell).toBe(2);
+    try {
+      const res = await page.request.patch(`/api/admin/participants/${p.id}/cell`, {
+        data: { cell: 1, reason: "mencoba ubah sel setelah mulai" },
+      });
+      expect(res.status()).toBe(409);
+      expect((await res.json()).error.code).toBe("CELL_LOCKED");
+      const { data } = await serviceClient().from("participants").select("cell").eq("id", p.id).single();
+      expect(data!.cell).toBe(2);
+    } finally {
+      // The fake "in progress" participant must not stay active (dashboard, live monitor).
+      await serviceClient()
+        .from("participants")
+        .update({ status: "cancelled", started_at: null })
+        .eq("id", p.id);
+    }
   });
 
   test("P2-5 deactivate a not-started code", async ({ page }) => {

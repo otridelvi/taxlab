@@ -61,7 +61,10 @@ export default async function DashboardPage() {
           <div>
             <b>Jumlah selesai antar sel timpang</b>
             Sel {l.cell} baru {l.completed} partisipan selesai, {l.gapPercent}% di bawah rata-rata (
-            {Math.round(l.average)}).
+            {Math.round(l.average)}).{" "}
+            {canGenerate ? (
+              <Link href={`/admin/generate?mode=manual&cell=${l.cell}`}>Generate untuk Sel {l.cell}</Link>
+            ) : null}
           </div>
         </div>
       ))}

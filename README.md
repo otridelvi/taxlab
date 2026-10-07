@@ -50,22 +50,28 @@ npm run dev          # http://localhost:3000/admin
 | `npm test`          | Unit test (node:test via tsx)           |
 | `npm run format`    | Prettier                                |
 | `npm run build`     | Production build                        |
+| `npm run test:e2e`  | E2E Playwright terhadap SIT             |
 
 ## Struktur
 
 ```
 app/admin/login/        Halaman login admin (A1) + server action
-app/admin/(panel)/      Layout panel + Dasbor (A2) + halaman lain
+app/admin/(panel)/      Layout panel + Dasbor (A2), Partisipan (A3), Generate (A4), halaman lain
+app/admin/print/        Kartu kode akses untuk dicetak (A4, 21 per halaman)
 app/admin/logout/       POST logout
+app/api/admin/          Route handler admin (generate, unduh kode, ubah sel, nonaktifkan)
 components/admin/       Header, menu, ikon
 lib/auth/               Peran & izin, pengguna saat ini, rate limit, redirect
+lib/access-code.ts      Pembuatan & normalisasi kode akses TX-XXXX-XXXX
+lib/allocate.ts         Alokasi sel (acak berimbang / manual) + pratinjau
 lib/db/                 Akses data (Supabase service role) + types
 lib/session.ts          Cookie sesi admin (batas 12 jam)
 proxy.ts                Proteksi /admin/* (Next.js 16: pengganti middleware)
-styles/tokens.css       Warna, font, jarak (tema)
+styles/tokens.css       Warna, font, jarak (tema B "Grafit")
 supabase/migrations/    Migrasi SQL
 scripts/                create-admin, db-check
 tests/unit/             Unit test
+tests/e2e/              Playwright (khusus SIT)
 ```
 
 ## Lingkungan

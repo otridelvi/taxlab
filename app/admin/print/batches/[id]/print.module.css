@@ -1,0 +1,89 @@
+.page {
+  padding: 24px;
+  background: var(--color-page);
+  min-height: 100vh;
+}
+.toolbar {
+  max-width: 210mm;
+  margin: 0 auto 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.toolbar div {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+.toolbar span {
+  color: var(--color-ink-muted);
+  font-size: 13px;
+}
+.sheet {
+  width: 190mm;
+  margin: 0 auto;
+  padding: 0;
+  background: #fff;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.card {
+  height: 39mm;
+  display: flex;
+  gap: 3mm;
+  align-items: center;
+  padding: 3mm 3.5mm;
+  border: 1px dashed #b7bdc3;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.qr {
+  flex: 0 0 22mm;
+  width: 22mm;
+  height: 22mm;
+}
+.qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.text {
+  min-width: 0;
+}
+.kicker {
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.code {
+  margin: 1mm 0;
+  font-family: var(--font-mono);
+  font-size: 12.5pt;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.small {
+  font-size: 7.5pt;
+  color: var(--color-ink-muted);
+  overflow-wrap: anywhere;
+}
+@page {
+  size: A4;
+  margin: 10mm;
+}
+@media print {
+  .page {
+    padding: 0;
+    background: #fff;
+  }
+  .toolbar {
+    display: none;
+  }
+  .sheet {
+    width: auto;
+  }
+}

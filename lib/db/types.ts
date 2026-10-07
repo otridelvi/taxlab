@@ -11,8 +11,8 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 type AdminRole = "admin" | "assistant" | "viewer";
-type ParticipantStatus = "not_started" | "in_progress" | "completed" | "timed_out" | "cancelled";
-type AssignmentMode = "random" | "manual";
+export type ParticipantStatus = "not_started" | "in_progress" | "completed" | "timed_out" | "cancelled";
+export type AssignmentMode = "random" | "manual";
 
 export type Database = {
   public: {
@@ -71,7 +71,8 @@ export type Database = {
           task_deadline: string | null;
           finished_at: string | null;
           current_page: string | null;
-          case_order: Json | null;
+          current_round: number | null;
+          code_key: string;
           content_version: string | null;
           created_at: string;
         };
@@ -86,12 +87,20 @@ export type Database = {
           task_deadline?: string | null;
           finished_at?: string | null;
           current_page?: string | null;
-          case_order?: Json | null;
+          current_round?: number | null;
           content_version?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["participants"]["Insert"]>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "participants_batch_id_fkey";
+            columns: ["batch_id"];
+            isOneToOne: false;
+            referencedRelation: "batches";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       audit_logs: {
         Row: {
@@ -134,7 +143,27 @@ export type Database = {
         Relationships: [];
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      create_batch: {
+        Args: {
+          p_admin_id: string;
+          p_label: string;
+          p_mode: AssignmentMode;
+          p_manual_cell: number | null;
+          p_codes: string[];
+          p_cells: number[];
+        };
+        Returns: string;
+      };
+      change_participant_cell: {
+        Args: { p_admin_id: string; p_participant_id: string; p_cell: number; p_reason: string };
+        Returns: string;
+      };
+      deactivate_participant: {
+        Args: { p_admin_id: string; p_participant_id: string; p_reason: string };
+        Returns: string;
+      };
+    };
     Enums: {
       admin_role: AdminRole;
       participant_status: ParticipantStatus;

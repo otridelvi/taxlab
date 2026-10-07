@@ -37,7 +37,9 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const userId = data?.claims.sub;
 
-  if (pathname === "/admin/login") return response;
+  // Login page and API routes: only refresh the session here. API route handlers
+  // answer 401/403 themselves (lib/api.ts) instead of redirecting.
+  if (pathname === "/admin/login" || pathname.startsWith("/api/")) return response;
 
   const marker = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   const session = await verifyAdminSession(marker, env.SESSION_SECRET);
@@ -65,5 +67,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

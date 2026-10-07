@@ -24,11 +24,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 1.5px solid var(--color-admin-bar-ink);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   font-family: var(--font-serif);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 .env {
@@ -37,6 +39,7 @@
   font-weight: 500;
   letter-spacing: 0.06em;
   padding: 3px 8px;
+  border-radius: 3px;
   border: 1px solid var(--color-env-production);
   color: var(--color-env-production-ink);
 }
@@ -83,8 +86,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid transparent;
+  min-height: 42px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--color-ink-soft);
@@ -95,10 +98,9 @@
   color: var(--color-ink);
 }
 .navLinkActive {
-  background: var(--color-surface);
-  border-color: var(--color-border);
+  background: var(--color-accent-tint);
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--color-accent-hover);
 }
 .content {
   flex: 999 1 640px;
@@ -133,8 +135,9 @@
 .pageTitle {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 600;
+  line-height: 1.2;
 }
 .pageSubtitle {
   margin: 2px 0 0;
@@ -144,7 +147,7 @@
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
 }
 .emptyState {
   padding: 40px 24px;

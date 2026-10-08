@@ -637,4 +637,29 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     await expect(summary(page2)).toContainText("Dibuka 1/14");
     await other.close();
   });
+
+  test("P4-15 refresh while a DETAIL and a file are open: case_close and ref_close (leave) are still sent", async ({
+    page,
+  }) => {
+    const code = await startAt(page, 1, "cases_r1");
+    await openDetail(page, 4);
+    await page
+      .getByRole("navigation", { name: "Berkas penugasan" })
+      .getByRole("button", { name: "Fakta Klien" })
+      .click();
+    await expect(dialog(page)).toBeVisible();
+    await page.waitForTimeout(500);
+    await page.reload();
+    await expect(heading(page, "Daftar kasus acuan")).toBeVisible();
+    await waitForEvents(
+      code,
+      (rows) => rows.some((e) => e.type === "case_close") && rows.some((e) => e.type === "ref_close"),
+    );
+    const rows = await eventsOf(code, ["case_close", "ref_close"]);
+    const reasons = Object.fromEntries(
+      rows.map((e) => [e.type, (e.meta as { reason?: string } | null)?.reason]),
+    );
+    expect(reasons).toEqual({ case_close: "leave", ref_close: "leave" });
+    expect(rows.every((e) => (e.duration_ms ?? 0) >= 400)).toBe(true);
+  });
 });

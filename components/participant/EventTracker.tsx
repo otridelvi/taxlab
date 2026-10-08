@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { flushEvents, initEvents, track } from "./events-client";
+import { closeAllReading } from "./reading";
 
 const FLUSH_INTERVAL_MS = 5000;
 
@@ -18,7 +19,11 @@ export function EventTracker({ sessionId }: { sessionId: string }) {
         track("tab_visible");
       }
     };
-    const onPageHide = () => void flushEvents(true);
+    const onPageHide = () => {
+      // Tab or browser closed, or a refresh: record the open case/file as closed (PLAN-04 D-7).
+      closeAllReading("leave");
+      void flushEvents(true);
+    };
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pagehide", onPageHide);
     return () => {

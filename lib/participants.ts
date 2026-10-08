@@ -64,7 +64,7 @@ export function filtersToQuery(f: Partial<ParticipantFilters>): string {
 }
 
 export function loginLink(baseUrl: string, code: string): string {
-  return `${baseUrl.replace(/\/+$/, "")}/masuk?kode=${encodeURIComponent(code)}`;
+  return `${baseUrl.replace(/\/+$/, "")}/login?code=${encodeURIComponent(code)}`;
 }
 
 // ---------------------------------------------------------------- request bodies

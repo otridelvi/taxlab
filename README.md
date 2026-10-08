@@ -38,7 +38,7 @@ Role: `admin` | `assistant` | `viewer`. Script menampilkan **password sementara*
 ### Menjalankan
 
 ```bash
-npm run dev          # http://localhost:3000/admin
+npm run dev          # http://localhost:3000 (partisipan), /admin (panel)
 ```
 
 ## Perintah lain
@@ -55,6 +55,10 @@ npm run dev          # http://localhost:3000/admin
 ## Struktur
 
 ```
+app/(participant)/      Web partisipan: / (persetujuan), /login (kode akses), /task (semua langkah)
+app/api/p/              Route handler partisipan (consent, login, state, responses, advance, events, finish)
+components/participant/ Kerangka, timer, form langkah (autosave + Next), antrean event, konten langkah
+content/                Alur (flow.ts) dan teks halaman (text.ts) dari docs/flow general.pptx
 app/admin/login/        Halaman login admin (A1) + server action
 app/admin/(panel)/      Layout panel + Dasbor (A2), Partisipan (A3), Generate (A4), halaman lain
 app/admin/print/        Kartu kode akses untuk dicetak (A4, 21 per halaman)
@@ -66,6 +70,8 @@ lib/access-code.ts      Pembuatan & normalisasi kode akses TX-XXXX-XXXX
 lib/allocate.ts         Alokasi sel (acak berimbang / manual) + pratinjau
 lib/db/                 Akses data (Supabase service role) + types
 lib/session.ts          Cookie sesi admin (batas 12 jam)
+lib/flow.ts             Langkah berikutnya, timer, isian per langkah (dipakai server)
+lib/participant-*.ts    Cookie, sesi, pesan, event, rate limit partisipan
 proxy.ts                Proteksi /admin/* (Next.js 16: pengganti middleware)
 styles/tokens.css       Warna, font, jarak (tema B "Grafit")
 supabase/migrations/    Migrasi SQL

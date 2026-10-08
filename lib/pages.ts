@@ -35,6 +35,7 @@ export const PAGE_NAMES: Record<string, string> = {
   demographics: "Demografi",
   debriefing: "Taklimat",
   finish: "Selesai",
+  time_up: "Waktu habis",
 };
 
 const SECTION_BY_PAGE: Record<string, string> = {
@@ -62,7 +63,7 @@ const SECTION_BY_PAGE: Record<string, string> = {
 export function positionLabel(pageId: string | null | undefined): string | null {
   if (!pageId) return null;
   const name = PAGE_NAMES[pageId] ?? pageId;
-  if (pageId === "review" || pageId === "finish") return name;
+  if (pageId === "review" || pageId === "finish" || pageId === "time_up") return name;
   const section = SECTION_BY_PAGE[pageId] ?? "Pembuka";
   return `${section} · ${name}`;
 }

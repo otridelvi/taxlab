@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { can } from "@/lib/auth/roles";
 import { CELL_LABELS, computeTotals, findLaggingCells, progressRatio } from "@/lib/dashboard";
 import { getBatchCount, getCellSummary, getDashboardSettings } from "@/lib/db/dashboard";
+import { closeStaleSessions } from "@/lib/db/participant-flow";
 
 export const metadata = { title: "Dasbor · Taxlab Admin" };
 
@@ -17,6 +18,8 @@ const updatedAt = new Intl.DateTimeFormat("id-ID", {
 
 export default async function DashboardPage() {
   const admin = await requireAdmin();
+  // Abandoned sessions become "timed_out" before counting (FSD-Participant §6.3).
+  await closeStaleSessions();
   const [cells, settings, batchCount] = await Promise.all([
     getCellSummary(),
     getDashboardSettings(),

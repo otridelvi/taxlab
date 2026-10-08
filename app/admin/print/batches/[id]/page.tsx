@@ -49,7 +49,7 @@ export default async function PrintCardsPage({ params }: PageProps<"/admin/print
             <div className={styles.text}>
               <div className={styles.kicker}>Studi Penyelesaian SPT Tahunan</div>
               <div className={styles.code}>{c.code}</div>
-              <div className={styles.small}>Pindai QR atau buka {host}/masuk</div>
+              <div className={styles.small}>Pindai QR atau buka {host}/login</div>
               <div className={styles.small}>{label}</div>
             </div>
           </div>

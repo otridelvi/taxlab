@@ -13,7 +13,7 @@ import { positionLabel } from "../../lib/pages";
 
 test("codes CSV has a BOM, the three columns and no cell column (G-08)", () => {
   const csv = codesToCsv([
-    { code: "TX-7KQ2-M9PA", batch: 'Kelas "A", pagi', loginLink: "https://x/masuk?kode=TX-7KQ2-M9PA" },
+    { code: "TX-7KQ2-M9PA", batch: 'Kelas "A", pagi', loginLink: "https://x/login?code=TX-7KQ2-M9PA" },
   ]);
   assert.ok(csv.startsWith("﻿code,batch,login_link\n"));
   assert.ok(csv.includes('"Kelas ""A"", pagi"'));
@@ -23,7 +23,7 @@ test("codes CSV has a BOM, the three columns and no cell column (G-08)", () => {
 test("login link", () => {
   assert.equal(
     loginLink("https://taxlab-sit.vercel.app/", "TX-7KQ2-M9PA"),
-    "https://taxlab-sit.vercel.app/masuk?kode=TX-7KQ2-M9PA",
+    "https://taxlab-sit.vercel.app/login?code=TX-7KQ2-M9PA",
   );
 });
 

@@ -1,6 +1,6 @@
 import type { Factors } from "@/lib/cell";
 import type { ItemSpec } from "@/lib/items";
-import { MINUTES_QUESTIONS } from "./text";
+import { COV, MINUTES_QUESTIONS, REC_LABELS } from "./text";
 
 /**
  * Participant flow as configuration (FSD-Participant §4). The page shown is
@@ -66,6 +66,68 @@ export const SECTION_LABELS: Record<Section, string> = {
   system: "Penugasan",
 };
 
+/**
+ * Must every one of the 14 cases get a rank and a Save answer before Next?
+ * (PERTANYAAN A4, assumption AP-4: yes.) Set to false to make them optional;
+ * repeated ranks are refused either way.
+ */
+export const REQUIRE_ALL_CASES = true;
+
+export const CASE_COUNT = 14;
+const RANK_GROUP = { id: "rank", name: "peringkat" } as const;
+const SAVE_GROUP = { id: "save", name: "pilihan simpan" } as const;
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const CASE_NUMBERS = Array.from({ length: CASE_COUNT }, (_, i) => i + 1);
+
+/** Item key of a case's rank / save answer (`rank_case03_r1`). */
+export const rankKey = (no: number, round: 1 | 2) => `rank_case${pad2(no)}_r${round}`;
+export const saveKey = (no: number, round: 1 | 2) => `save_case${pad2(no)}_r${round}`;
+
+const casesItems = (round: 1 | 2) => (): ItemSpec[] => [
+  ...CASE_NUMBERS.map((no): ItemSpec => ({
+    key: rankKey(no, round),
+    type: "integer",
+    name: `peringkat kasus ${no}`,
+    min: 1,
+    max: CASE_COUNT,
+    unique: `rank_r${round}`,
+    group: RANK_GROUP,
+    required: REQUIRE_ALL_CASES,
+  })),
+  ...CASE_NUMBERS.map((no): ItemSpec => ({
+    key: saveKey(no, round),
+    type: "binary",
+    name: `pilihan simpan kasus ${no}`,
+    group: SAVE_GROUP,
+    required: REQUIRE_ALL_CASES,
+  })),
+];
+
+const covariateItems = (): ItemSpec[] =>
+  COV.map((q, i) => ({
+    key: `cov_q${i + 1}`,
+    type: "choice" as const,
+    legend: q.legend,
+    options: q.options,
+    name: `jawaban pertanyaan ${i + 1}`,
+    letters: true,
+    number: i + 1,
+  }));
+
+const recItems = (round: 1 | 2) => (): ItemSpec[] =>
+  REC_LABELS.map(([id, label]) => ({
+    key: `rec_${id}_r${round}`,
+    type: "integer" as const,
+    name: label.charAt(0).toLowerCase() + label.slice(1),
+    label,
+    min: 0,
+    max: 9_999_999_999_999,
+  }));
+
+const confidenceItems = (round: 1 | 2) => (): ItemSpec[] => [
+  { key: `confidence_r${round}`, type: "integer", name: "tingkat keyakinan", min: 0, max: 100 },
+];
+
 const M3 = ["facts", "minutes", "memo"] as const;
 const M4 = ["facts", "minutes", "memo", "review"] as const;
 
@@ -118,19 +180,36 @@ export const FLOW_A: readonly Step[] = [
   { id: "memo_intro", kind: "text", section: "files", next: "Buka memo penugasan" },
   { id: "memo", kind: "memo", section: "files", items: memoItems },
   { id: "cases_intro_r1", kind: "text", section: "cases", round: 1, next: "Lihat kasus acuan" },
-  { id: "cases_r1", kind: "cases", section: "cases", round: 1, menu: M3 },
-  { id: "covariates", kind: "mcq", section: "questions", round: 1, menu: M3 },
+  { id: "cases_r1", kind: "cases", section: "cases", round: 1, menu: M3, items: casesItems(1) },
+  { id: "covariates", kind: "mcq", section: "questions", round: 1, menu: M3, items: covariateItems },
   { id: "rec_intro_r1", kind: "text", section: "recommendation", round: 1, menu: M3 },
   { id: "client_draft_r1", kind: "draft", section: "recommendation", round: 1, menu: M3 },
-  { id: "rec_r1", kind: "recommendation", section: "recommendation", round: 1, menu: M3 },
-  { id: "confidence_r1", kind: "confidence", section: "recommendation", round: 1, menu: M3 },
+  { id: "rec_r1", kind: "recommendation", section: "recommendation", round: 1, menu: M3, items: recItems(1) },
+  {
+    id: "confidence_r1",
+    kind: "confidence",
+    section: "recommendation",
+    round: 1,
+    menu: M3,
+    items: confidenceItems(1),
+    next: "Simpan",
+  },
   { id: "review", kind: "review", section: "review", menu: M3 },
   { id: "cases_intro_r2", kind: "text", section: "cases", round: 2, menu: M4, next: "Lihat kasus acuan" },
-  { id: "cases_r2", kind: "cases", section: "cases", round: 2, menu: M4 },
+  { id: "cases_r2", kind: "cases", section: "cases", round: 2, menu: M4, items: casesItems(2) },
   { id: "rec_intro_r2", kind: "text", section: "recommendation", round: 2, menu: M4 },
   { id: "client_draft_r2", kind: "draft", section: "recommendation", round: 2, menu: M4 },
-  { id: "rec_r2", kind: "recommendation", section: "recommendation", round: 2, menu: M4 },
-  { id: "confidence_r2", kind: "confidence", section: "recommendation", round: 2, menu: M4, timer: "end" },
+  { id: "rec_r2", kind: "recommendation", section: "recommendation", round: 2, menu: M4, items: recItems(2) },
+  {
+    id: "confidence_r2",
+    kind: "confidence",
+    section: "recommendation",
+    round: 2,
+    menu: M4,
+    timer: "end",
+    items: confidenceItems(2),
+    next: "Simpan",
+  },
   { id: "mc_choice", kind: "mcq", section: "quest" },
   { id: "mc_likert", kind: "likert", section: "quest" },
   { id: "demographics", kind: "demographics", section: "quest" },

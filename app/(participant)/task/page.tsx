@@ -4,9 +4,10 @@ import { SECTION_LABELS } from "@/content/flow";
 import { FinishStep } from "@/components/participant/FinishStep";
 import { FirmShell, StudyShell, type TimerInfo } from "@/components/participant/Shell";
 import { StepForm } from "@/components/participant/StepForm";
-import { Sheet, stepView } from "@/components/participant/steps";
+import { RefBar, RefButton, RefProvider } from "@/components/participant/RefMenu";
+import { caseViews, refDocs, Sheet, stepView } from "@/components/participant/steps";
 import s from "@/components/participant/p.module.css";
-import { getParticipantSettings, getSavedValues } from "@/lib/db/participant-flow";
+import { getOpenedCases, getParticipantSettings, getSavedValues } from "@/lib/db/participant-flow";
 import { itemsForStep, isTaskStep, TIME_UP_STEP_ID } from "@/lib/flow";
 import { applyTimeout, readParticipantSession, remainingMs } from "@/lib/participant-api";
 import { P_MESSAGES } from "@/lib/participant-messages";
@@ -97,22 +98,46 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
     items.map((i) => i.key),
   );
   const view = stepView(step, factors);
+  const isCases = step.kind === "cases" && step.round !== undefined;
+  const opened = isCases ? await getOpenedCases(participant.id, step.round!) : [];
+  const menu = step.menu ?? [];
 
-  return (
-    <FirmShell section={SECTION_LABELS[step.section]} code={participant.accessCode} timer={timer}>
+  const body = (
+    <FirmShell
+      section={SECTION_LABELS[step.section]}
+      code={participant.accessCode}
+      timer={timer}
+      wide={isCases}
+      headerAction={menu.length > 0 ? <RefButton /> : undefined}
+    >
       {resumeNotice}
+      {menu.length > 0 && <RefBar />}
       <StepForm
         key={step.id}
         page={step.id}
+        kind={step.kind}
+        round={step.round}
         items={items}
         initial={initial}
         nextLabel={step.next ?? "Next"}
         footNote={view.footNote}
         fieldsTitle={view.fieldsTitle}
         fieldsIntro={view.fieldsIntro}
+        heading={view.heading}
+        cases={isCases ? caseViews() : undefined}
+        opened={opened}
       >
         {view.content}
       </StepForm>
     </FirmShell>
+  );
+
+  // The menu Berkas (PLAN-04) is per step: opening state and the file log reset when the step changes.
+  return menu.length > 0 ? (
+    <RefProvider key={step.id} keys={menu} docs={refDocs(factors, menu)}>
+      {body}
+    </RefProvider>
+  ) : (
+    body
   );
 }

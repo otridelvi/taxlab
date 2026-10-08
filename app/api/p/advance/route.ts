@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { itemsForStep, transition } from "@/lib/flow";
-import { missingItems, splitItems } from "@/lib/items";
+import { itemsForStep, transition, validateStep } from "@/lib/flow";
+import { hasProblems, problemsMessage, splitItems } from "@/lib/items";
 import { P_MESSAGES } from "@/lib/participant-messages";
 import { pError, readBody, remainingMs, requireActiveSession } from "@/lib/participant-api";
 import { advanceStep, getParticipantSettings } from "@/lib/db/participant-flow";
@@ -33,8 +33,13 @@ export async function POST(request: Request) {
   const split = splitItems(specs, items, "draft");
   if (split.invalid.length)
     return pError(422, "INVALID_ITEM", P_MESSAGES.invalidItem, { keys: split.invalid });
-  const missing = missingItems(specs, items);
-  if (missing.length) return pError(422, "INCOMPLETE", "Isian belum lengkap.", { missing });
+  const problems = validateStep(session.step, session.factors, items);
+  if (hasProblems(problems)) {
+    return pError(422, "INCOMPLETE", problemsMessage(specs, problems) || "Isian belum lengkap.", {
+      missing: problems.missing,
+      duplicate: problems.duplicate,
+    });
+  }
   const final = splitItems(specs, items, "final");
 
   const move = transition(session.flow, session.step.id);

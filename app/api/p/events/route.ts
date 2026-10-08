@@ -24,6 +24,7 @@ export async function POST(request: Request) {
       // The round comes from the page, never from the browser.
       round: getStep(session.flow, e.page_id)?.round ?? null,
       client_ts: e.client_ts,
+      duration_ms: e.duration_ms ?? null,
       meta: e.meta ?? null,
     })),
   );

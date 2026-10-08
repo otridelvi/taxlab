@@ -26,6 +26,8 @@ export const clientEventSchema = z.object({
   target: z.string().max(60).nullish(),
   page_id: z.string().max(40).nullish(),
   client_ts: z.iso.datetime({ offset: true }),
+  /** Milliseconds a case/file stayed open (case_close, ref_close); the raw open/close pair stays the source of truth. */
+  duration_ms: z.number().int().min(0).max(86_400_000).nullish(),
   meta: z
     .record(z.string().max(40), z.union([z.string().max(200), z.number(), z.boolean(), z.null()]))
     .refine((m) => Object.keys(m).length <= 10)

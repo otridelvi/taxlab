@@ -1,88 +1,29 @@
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { generateAccessCodes } from "../../lib/access-code";
-import { ACCOUNTS, serviceClient } from "./fixtures";
+import { serviceClient } from "./fixtures";
+import {
+  clickNext,
+  consentAndLogin,
+  createCodeTracker,
+  heading,
+  loginApi,
+  nextUntil,
+  participant,
+} from "./participant-helpers";
 
 /**
  * PLAN-03 · participant skeleton (consent → login → steps → finish).
  * Codes are created directly with create_batch under the E2E admin; batches are
- * labelled "E2E P3 …". Participants left in progress are cancelled afterwards so
- * they do not show up as active on the dashboard.
+ * labelled "E2E P3 …". The task pages built in PLAN-04 are covered by
+ * participant-tasks.spec.ts; here the flow is only walked up to the cases intro,
+ * and through the questionnaire placeholders after a time-out.
  */
-const stamp = () => new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "");
-const created: string[] = [];
-
-async function e2eAdminId(): Promise<string> {
-  const { data, error } = await serviceClient()
-    .from("admins")
-    .select("id")
-    .eq("name", ACCOUNTS.admin.name)
-    .single();
-  if (error || !data) throw new Error(`E2E admin not found: ${error?.message}`);
-  return data.id;
-}
-
-/** New access codes for the given cells. */
-async function makeCodes(cells: number[]): Promise<string[]> {
-  const codes = generateAccessCodes(cells.length);
-  const { error } = await serviceClient().rpc("create_batch", {
-    p_admin_id: await e2eAdminId(),
-    p_label: `E2E P3 ${stamp()}`,
-    p_mode: "random",
-    p_manual_cell: null,
-    p_codes: codes,
-    p_cells: cells,
-  });
-  if (error) throw new Error(`create_batch: ${error.message}`);
-  created.push(...codes);
-  return codes;
-}
-
-async function participant(code: string) {
-  const { data } = await serviceClient().from("participants").select("*").eq("access_code", code).single();
-  return data!;
-}
+const codes = createCodeTracker("P3");
+const makeCodes = codes.makeCodes;
 
 test.afterAll(async () => {
-  if (created.length === 0) return;
-  await serviceClient()
-    .from("participants")
-    .update({ status: "cancelled" })
-    .in("access_code", created)
-    .eq("status", "in_progress");
+  await codes.cleanUp();
 });
-
-async function consentAndLogin(page: Page, code: string) {
-  await page.goto(`/login?code=${code}`);
-  await expect(page).toHaveURL(/\/\?code=/);
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Setuju dan masuk" }).click();
-  await expect(page).toHaveURL(/\/login\?code=/);
-  await expect(page.getByLabel("Kode akses")).toHaveValue(code);
-  await page.getByRole("button", { name: "Masuk" }).click();
-  await expect(page).toHaveURL(/\/task/);
-}
-
-async function clickNext(page: Page, label = "Next") {
-  await page.getByRole("button", { name: label, exact: true }).click();
-}
-
-const heading = (page: Page, name: string | RegExp) => page.getByRole("heading", { level: 1, name });
-
-/** Clicks the main button until the given heading shows (placeholders included). */
-async function nextUntil(page: Page, name: string | RegExp, max = 40) {
-  const main = page.locator("main");
-  for (let i = 0; i < max; i++) {
-    if (await heading(page, name).isVisible()) return;
-    const before = await main.innerText();
-    await main.locator("button").last().click();
-    await expect.poll(() => main.innerText(), { timeout: 10_000 }).not.toBe(before);
-  }
-  throw new Error(`Did not reach "${name}"`);
-}
-
-async function loginApi(request: APIRequestContext, code: string) {
-  return request.post("/api/p/login", { data: { code } });
-}
 
 test.describe("PLAN-03 · participant flow", () => {
   test("P3-1/P3-2 link without consent → consent → login → welcome; session data stored", async ({

@@ -226,6 +226,7 @@ export type ClientEvent = {
   round: number | null;
   page_id: string | null;
   client_ts: string;
+  duration_ms: number | null;
   meta: Json | null;
 };
 
@@ -243,6 +244,26 @@ export async function insertEvents(participantId: string, sessionId: string, eve
     .upsert(rows, { onConflict: "participant_id,session_id,seq", ignoreDuplicates: true });
   if (error) throw new Error(`Failed to insert events: ${error.message}`);
   return rows.length;
+}
+
+/**
+ * Case numbers (1–14) whose detail the participant opened in a round (events `case_open`),
+ * so the "Sudah dibuka" mark survives a refresh or resume (PLAN-04 D-6).
+ */
+export async function getOpenedCases(participantId: string, round: 1 | 2): Promise<number[]> {
+  const { data, error } = await serviceClient()
+    .from("events")
+    .select("target")
+    .eq("participant_id", participantId)
+    .eq("type", "case_open")
+    .eq("round", round);
+  if (error) throw new Error(`Failed to load opened cases: ${error.message}`);
+  const numbers = new Set<number>();
+  for (const row of data ?? []) {
+    const match = /^case(\d{2})$/.exec(row.target ?? "");
+    if (match) numbers.add(Number(match[1]));
+  }
+  return [...numbers].sort((a, b) => a - b);
 }
 
 /** Marks abandoned sessions as timed_out (FSD-Participant §6.3). Returns the number closed. */

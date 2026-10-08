@@ -1,6 +1,6 @@
 import { FLOW_A, TIME_UP_STEP, type Step } from "@/content/flow";
 import type { Factors } from "./cell";
-import type { ItemSpec } from "./items";
+import { stepProblems, type ItemSpec, type ItemValues, type StepProblems } from "./items";
 import type { FlowVersion } from "./db/types";
 
 /** Flow helpers (FSD-Participant §4, §6, §7). Pure functions over content/flow.ts. */
@@ -55,4 +55,9 @@ export function isTaskStep(flow: readonly Step[], id: string): boolean {
 
 export function itemsForStep(step: Step, factors: Factors): ItemSpec[] {
   return step.items ? step.items(factors) : [];
+}
+
+/** Missing/invalid items and repeated ranks of a step (same rule in browser and server, FSD §7.2). */
+export function validateStep(step: Step, factors: Factors, values: ItemValues): StepProblems {
+  return stepProblems(itemsForStep(step, factors), values);
 }

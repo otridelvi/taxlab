@@ -2,20 +2,40 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { missingItems, missingMessage, type ItemSpec, type ItemValues } from "@/lib/items";
+import type { StepKind } from "@/content/flow";
+import {
+  hasProblems,
+  problemsMessage,
+  stepProblems,
+  type ItemSpec,
+  type ItemValues,
+  type StepProblems,
+} from "@/lib/items";
 import { P_MESSAGES } from "@/lib/participant-messages";
+import { CasesBoard, type CaseView } from "./CasesBoard";
+import { ConfidenceField } from "./ConfidenceField";
 import { flushEvents, setCurrentPage, track } from "./events-client";
+import { Fields } from "./Fields";
+import { MoneyFields } from "./MoneyFields";
+import { closeAllReading } from "./reading";
 import { useReloadStep } from "./use-reload-step";
 import s from "./p.module.css";
 
 type Props = {
   page: string;
+  kind: StepKind;
+  round?: 1 | 2;
   items: ItemSpec[];
   initial: ItemValues;
   nextLabel: string;
   footNote?: string;
   fieldsTitle?: string;
   fieldsIntro?: string;
+  /** Kick + h1 of the items sheet, for steps whose items are the whole page (recommendation, confidence). */
+  heading?: { kick: string; title: string };
+  /** Case list of a `cases` step, and the cases already opened in this round (server's view). */
+  cases?: CaseView[];
+  opened?: number[];
   children: ReactNode;
 };
 
@@ -49,12 +69,17 @@ function writeBackup(page: string, values: ItemValues | null) {
  */
 export function StepForm({
   page,
+  kind,
+  round,
   items,
   initial,
   nextLabel,
   footNote,
   fieldsTitle,
   fieldsIntro,
+  heading,
+  cases,
+  opened = [],
   children,
 }: Props) {
   const reload = useReloadStep();
@@ -66,7 +91,7 @@ export function StepForm({
   const saveTimer = useRef<number | undefined>(undefined);
   const retries = useRef(0);
   const [saveFailing, setSaveFailing] = useState(false);
-  const [missing, setMissing] = useState<string[]>([]);
+  const [wrong, setWrong] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -129,16 +154,20 @@ export function StepForm({
     setValues(next);
     dirty.current.add(key);
     writeBackup(page, Object.fromEntries([...dirty.current].map((k) => [k, next[k]])));
-    if (missing.includes(key)) setMissing((m) => m.filter((x) => x !== key));
+    if (wrong.includes(key)) setWrong((m) => m.filter((x) => x !== key));
     window.clearTimeout(saveTimer.current);
     saveTimer.current = window.setTimeout(() => void save(), AUTOSAVE_DELAY_MS);
   }
 
+  function reportProblems(problems: StepProblems) {
+    setWrong([...problems.missing, ...problems.duplicate]);
+    setMessage(problemsMessage(items, problems));
+  }
+
   async function next() {
-    const lacking = missingItems(items, valuesRef.current);
-    if (lacking.length) {
-      setMissing(lacking);
-      setMessage(missingMessage(items, lacking));
+    const problems = stepProblems(items, valuesRef.current);
+    if (hasProblems(problems)) {
+      reportProblems(problems);
       return;
     }
     window.clearTimeout(saveTimer.current);
@@ -154,6 +183,7 @@ export function StepForm({
       if (res.ok || res.status === 409) {
         dirty.current.clear();
         writeBackup(page, null);
+        closeAllReading("leave"); // an open case or file ends here (PLAN-04 D-7)
         void flushEvents();
         return reload();
       }
@@ -163,8 +193,10 @@ export function StepForm({
       }
       const err = (await res.json().catch(() => null))?.error;
       if (res.status === 422 && Array.isArray(err?.missing)) {
-        setMissing(err.missing);
-        setMessage(missingMessage(items, err.missing));
+        reportProblems({
+          missing: err.missing,
+          duplicate: Array.isArray(err.duplicate) ? err.duplicate : [],
+        });
       } else {
         setMessage(err?.message ?? P_MESSAGES.server);
       }
@@ -175,19 +207,46 @@ export function StepForm({
     }
   }
 
+  const fieldProps = { items, values, missing: wrong, onChange: change };
+
   return (
     <>
       {children}
-      {items.length > 0 && (
-        <section className={`${s.sheet} ${s.ui}`} aria-label={fieldsTitle}>
-          {fieldsTitle && <h2 className={s.h2}>{fieldsTitle}</h2>}
-          {fieldsIntro && (
-            <p className={s.muted} style={{ margin: "0 0 20px" }}>
-              {fieldsIntro}
-            </p>
-          )}
-          <Fields items={items} values={values} missing={missing} onChange={change} />
-        </section>
+      {kind === "cases" && cases ? (
+        <CasesBoard
+          cases={cases}
+          items={items}
+          values={values}
+          missing={wrong}
+          opened={opened}
+          round={round ?? 1}
+          onChange={change}
+        />
+      ) : (
+        items.length > 0 && (
+          <section className={`${s.sheet} ${s.ui}`} aria-label={fieldsTitle ?? heading?.title}>
+            {heading ? (
+              <>
+                <div className={s.kick}>{heading.kick}</div>
+                <h1 className={s.title}>{heading.title}</h1>
+              </>
+            ) : (
+              fieldsTitle && <h2 className={s.h2}>{fieldsTitle}</h2>
+            )}
+            {fieldsIntro && (
+              <p className={s.muted} style={{ margin: "0 0 20px" }}>
+                {fieldsIntro}
+              </p>
+            )}
+            {kind === "recommendation" ? (
+              <MoneyFields {...fieldProps} />
+            ) : kind === "confidence" ? (
+              <ConfidenceField {...fieldProps} />
+            ) : (
+              <Fields {...fieldProps} />
+            )}
+          </section>
+        )
       )}
       <div className={s.foot}>
         {footNote ? <span className={s.muted}>{footNote}</span> : <span />}
@@ -207,73 +266,6 @@ export function StepForm({
           </button>
         </div>
       </div>
-    </>
-  );
-}
-
-function Fields({
-  items,
-  values,
-  missing,
-  onChange,
-}: {
-  items: ItemSpec[];
-  values: ItemValues;
-  missing: string[];
-  onChange: (key: string, value: unknown) => void;
-}) {
-  const choices = items.filter((i) => i.type === "choice");
-  const texts = items.filter((i) => i.type !== "choice");
-  return (
-    <>
-      {choices.map((item) => {
-        const bad = missing.includes(item.key);
-        return (
-          <fieldset key={item.key} className={`${s.q} ${bad ? s.qBad : ""}`}>
-            <legend dangerouslySetInnerHTML={{ __html: item.legend }} />
-            <div className={s.opts}>
-              {item.options.map((label, i) => {
-                const on = Number(values[item.key]) === i + 1;
-                return (
-                  <label key={i} className={`${s.opt} ${on ? s.optOn : ""} ${bad ? s.bad : ""}`}>
-                    <input
-                      type="radio"
-                      name={item.key}
-                      value={i + 1}
-                      checked={on}
-                      onChange={() => onChange(item.key, i + 1)}
-                    />
-                    <span dangerouslySetInnerHTML={{ __html: label }} />
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-        );
-      })}
-      {texts.length > 0 && (
-        <div className={s.fields}>
-          {texts.map((item) => {
-            const bad = missing.includes(item.key);
-            return (
-              <div key={item.key} className={s.fld}>
-                <label htmlFor={`f-${item.key}`}>{item.label}</label>
-                <input
-                  id={`f-${item.key}`}
-                  className={bad ? s.bad : undefined}
-                  type={item.type === "email" ? "email" : "text"}
-                  inputMode={item.type === "email" ? "email" : undefined}
-                  autoComplete={item.autoComplete}
-                  maxLength={item.maxLength}
-                  value={String(values[item.key] ?? "")}
-                  aria-invalid={bad || undefined}
-                  onChange={(e) => onChange(item.key, e.target.value)}
-                />
-              </div>
-            );
-          })}
-        </div>
-      )}
     </>
   );
 }

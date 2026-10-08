@@ -31,11 +31,17 @@ export function FirmShell({
   section,
   code,
   timer,
+  headerAction,
+  wide,
   children,
 }: {
   section: string;
   code?: string;
   timer: TimerInfo;
+  /** Phone-only button on the sub bar (menu Berkas). */
+  headerAction?: ReactNode;
+  /** Full-width content column (case list). */
+  wide?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -70,10 +76,11 @@ export function FirmShell({
                 Kode akses <span className={s.code}>{code}</span>
               </span>
             )}
+            {headerAction}
           </div>
         </div>
       </header>
-      <main className={s.narrow}>{children}</main>
+      <main className={`${s.narrow} ${wide ? s.wide : ""}`}>{children}</main>
     </div>
   );
 }

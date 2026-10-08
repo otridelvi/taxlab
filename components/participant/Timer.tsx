@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { track } from "./events-client";
+import { flushEvents, track } from "./events-client";
+import { closeAllReading } from "./reading";
 import { useReloadStep } from "./use-reload-step";
 import s from "./p.module.css";
 
@@ -47,13 +48,17 @@ export function Timer({ initialLeftMs, warningMs, page }: Props) {
       }
       if (now <= 0 && !expiredSent.current) {
         expiredSent.current = true;
-        void fetch("/api/p/advance", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ from: page, reason: "timer_expired" }),
-        })
-          .catch(() => undefined)
-          .finally(reload);
+        // An open case or file is closed and reported before the "time up" screen (PLAN-04 D-7).
+        closeAllReading("leave");
+        void flushEvents().then(() =>
+          fetch("/api/p/advance", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ from: page, reason: "timer_expired" }),
+          })
+            .catch(() => undefined)
+            .finally(reload),
+        );
       }
     };
     const id = window.setInterval(tick, 250);

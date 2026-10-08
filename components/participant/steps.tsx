@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 import type { Step } from "@/content/flow";
+import cases from "@/content/cases.json";
 import * as T from "@/content/text";
 import type { Factors } from "@/lib/cell";
+import type { CaseView } from "./CasesBoard";
+import type { RefKey } from "./RefMenu";
 import s from "./p.module.css";
 
 /**
@@ -109,11 +112,17 @@ function Accounts({ from, to }: { from: number; to: number }) {
   );
 }
 
-export function MemoDoc({ strong }: { strong: boolean }) {
+/** Heading of a document: h1 on its own page, h2 inside the file panel. */
+function DocTitle({ level = 1, children }: { level?: 1 | 2; children: ReactNode }) {
+  const Tag = level === 1 ? "h1" : "h2";
+  return <Tag className={s.title}>{children}</Tag>;
+}
+
+export function MemoDoc({ strong, level = 1 }: { strong: boolean; level?: 1 | 2 }) {
   return (
     <>
       <Kop refNo="MEMO/[NOMOR]" />
-      <h1 className={s.title}>Memo Penugasan</h1>
+      <DocTitle level={level}>Memo Penugasan</DocTitle>
       <dl className={s.meta}>
         <div>
           <dt>Untuk</dt>
@@ -147,11 +156,110 @@ export function MemoDoc({ strong }: { strong: boolean }) {
   );
 }
 
+/** Placeholder Reviu Atasan (PERTANYAAN A6/Q8): same text for every cell until the researcher decides. */
+function reviewParas(f: Factors): readonly string[] {
+  void f; // add per-factor variants here when the final text exists
+  return T.REVIEW_BODY;
+}
+
+export function ReviewDoc({ f, level = 1 }: { f: Factors; level?: 1 | 2 }) {
+  return (
+    <>
+      <Kop refNo="REVIU/[NOMOR]" />
+      <DocTitle level={level}>{T.REVIEW_TITLE}</DocTitle>
+      <dl className={s.meta}>
+        <div>
+          <dt>Untuk</dt>
+          <dd>Staf Pajak</dd>
+        </div>
+        <div>
+          <dt>Dari</dt>
+          <dd>Manajer Pajak</dd>
+        </div>
+        <div>
+          <dt>Tanggal</dt>
+          <dd>[TANGGAL]</dd>
+        </div>
+        <div>
+          <dt>Subjek</dt>
+          <dd>{T.REVIEW_SUBJECT}</dd>
+        </div>
+      </dl>
+      <Paras list={reviewParas(f)} />
+      <p style={{ fontStyle: "italic" }}>Manajer Pajak</p>
+    </>
+  );
+}
+
+function FactsIntro() {
+  return (
+    <>
+      <dl className={s.dl}>
+        <dt>Nama klien</dt>
+        <dd>PT Cahaya Gama</dd>
+        <dt>Intisari kasus</dt>
+        <dd>Minta saran atas rekonsiliasi fiskal yang telah disiapkan oleh staf pajak perusahaan.</dd>
+      </dl>
+      <Html html={T.FACT1_P} />
+      <div className={s.kick} style={{ marginTop: 8 }}>
+        Rencana bisnis perusahaan
+      </div>
+      <ol className={s.plan} aria-label="Rencana bisnis perusahaan">
+        {T.PLAN.map((t, i) => (
+          <li key={t} className={i === T.PLAN.length - 1 ? s.planEnd : undefined}>
+            <small>{i + 1}</small>
+            {t}
+          </li>
+        ))}
+      </ol>
+    </>
+  );
+}
+
+function RefHead({ title }: { title: string }) {
+  return (
+    <>
+      <div className={s.kick}>Berkas penugasan</div>
+      <h2 className={s.title}>{title}</h2>
+    </>
+  );
+}
+
+/**
+ * The reference files of the menu Berkas penugasan, in the variant of the participant's
+ * cell. Rendered on the server; only the files the step offers are sent (PLAN-04 D-8).
+ */
+export function refDocs(f: Factors, keys: readonly RefKey[]): Partial<Record<RefKey, ReactNode>> {
+  const all: Record<RefKey, () => ReactNode> = {
+    facts: () => (
+      <>
+        <RefHead title="Fakta Klien" />
+        <FactsIntro />
+        <Paras list={T.FACT2_P} />
+        <Ledger rows={T.COSTS_FACT} />
+        <h3 className={s.h2}>Keterangan akun</h3>
+        <Accounts from={0} to={4} />
+      </>
+    ),
+    minutes: () => (
+      <>
+        <RefHead title="Ikhtisar Berita Acara Pertemuan dengan Manajemen Klien" />
+        {f.pref === "impl" ? <Html html={T.MIN_IMPL} /> : <Paras list={T.MIN_EXPL} />}
+      </>
+    ),
+    memo: () => <MemoDoc strong={f.acc === "strong"} level={2} />,
+    review: () => <ReviewDoc f={f} level={2} />,
+  };
+  return Object.fromEntries(keys.map((k) => [k, all[k]()]));
+}
+
 export type StepView = {
   content: ReactNode;
   footNote?: string;
   fieldsTitle?: string;
   fieldsIntro?: string;
+  /** Kick + h1 of the items sheet (steps that are only their items). */
+  heading?: { kick: string; title: string };
 };
 
 /** Content for a step. Steps built in later plans render a placeholder (PLAN-03 D-8). */
@@ -231,24 +339,7 @@ export function stepView(step: Step, f: Factors): StepView {
         content: (
           <Sheet>
             <Head kick="Fakta Klien · 1 dari 4" title="Fakta Klien" />
-            <dl className={s.dl}>
-              <dt>Nama klien</dt>
-              <dd>PT Cahaya Gama</dd>
-              <dt>Intisari kasus</dt>
-              <dd>Minta saran atas rekonsiliasi fiskal yang telah disiapkan oleh staf pajak perusahaan.</dd>
-            </dl>
-            <Html html={T.FACT1_P} />
-            <div className={s.kick} style={{ marginTop: 8 }}>
-              Rencana bisnis perusahaan
-            </div>
-            <ol className={s.plan} aria-label="Rencana bisnis perusahaan">
-              {T.PLAN.map((t, i) => (
-                <li key={t} className={i === T.PLAN.length - 1 ? s.planEnd : undefined}>
-                  <small>{i + 1}</small>
-                  {t}
-                </li>
-              ))}
-            </ol>
+            <FactsIntro />
           </Sheet>
         ),
       };
@@ -364,6 +455,39 @@ export function stepView(step: Step, f: Factors): StepView {
           </Sheet>
         ),
       };
+    case "cases_r1":
+    case "cases_r2":
+      return { footNote: T.CASES_TEXT.foot, content: null };
+    case "covariates":
+      return {
+        heading: { kick: "Pertanyaan", title: "Pertanyaan pengetahuan" },
+        fieldsIntro: T.COV_INTRO,
+        content: null,
+      };
+    case "rec_r1":
+    case "rec_r2":
+      return {
+        heading: { kick: "Rekomendasi", title: T.REC_TEXT.title },
+        fieldsIntro: T.REC_TEXT.hint,
+        footNote: T.REC_TEXT.foot,
+        content: null,
+      };
+    case "confidence_r1":
+    case "confidence_r2":
+      return {
+        heading: { kick: "Rekomendasi", title: "Tingkat keyakinan" },
+        fieldsIntro: T.CONF_TEXT,
+        content: null,
+      };
+    case "review":
+      return {
+        footNote: T.REVIEW_FOOT,
+        content: (
+          <Sheet>
+            <ReviewDoc f={f} />
+          </Sheet>
+        ),
+      };
     case "debriefing":
       return {
         content: (
@@ -403,4 +527,18 @@ export function stepView(step: Step, f: Factors): StepView {
         ),
       };
   }
+}
+
+/**
+ * The 14 reference cases, identical in both rounds (PRD P-64). Detail text comes from
+ * content/cases.json (placeholder until the researcher supplies it) and is rendered here,
+ * on the server, as ready-made elements (PLAN-04 D-5).
+ */
+export function caseViews(): CaseView[] {
+  return cases.map((c) => ({
+    no: c.no,
+    name: c.name,
+    summary: c.summary,
+    detail: c.detail.map((p, i) => <p key={i}>{p}</p>),
+  }));
 }

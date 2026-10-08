@@ -183,3 +183,91 @@ export const MINUTES_QUESTIONS = [
     ],
   },
 ] as const;
+
+/** Pertanyaan pengetahuan / kovariat (PLAN-04). Opsi bernomor 1–3, ditampilkan dengan huruf a/b/c. */
+export const COV_INTRO = "Berikutnya, anda diminta untuk menjawab pertanyaan-pertanyaan berikut." as const;
+
+export const COV = [
+  {
+    legend:
+      "Ketentuan mengenai <em>deductible</em> dan <em>non-deductible expenses</em> diatur dalam pasal … UU Pajak Penghasilan",
+    options: ["Pasal 7 dan 9 UU PPh", "Pasal 6 dan 9 UU PPh", "Pasal 4 dan 5 UU PPh"],
+  },
+  {
+    legend:
+      "Biaya <em>know how fee</em> (jasa konsultasi) tidak dapat dibiayakan (<em>non-deductible expense</em>) jika:",
+    options: [
+      "Terdapat hubungan istimewa",
+      "Terdapat hubungan istimewa dan pemberi jasa adalah induk perusahaan",
+      "Diberikan oleh siapapun juga",
+    ],
+  },
+  {
+    legend: "Biaya <em>entertainment</em> dapat dibiayakan sebesar:",
+    options: [
+      "Seluruh biaya yang dilaporkan dalam laporan keuangan secara akuntansi",
+      "Semua biaya entertainment yang dikeluarkan oleh perusahaan dalam mendukung usaha perusahaan",
+      "Semua biaya entertainment yang dilengkapi dengan daftar nominatif",
+    ],
+  },
+  {
+    legend:
+      "Agar dapat dibiayakan sebagai pengurang penghasilan, biaya perbaikan dan pemeliharaan harus mempertimbangkan:",
+    options: ["Aturan kapitalisasi", "Umur manfaat dan tambahan kemampuan aset tetap", "A dan B benar"],
+  },
+  {
+    legend: "Biaya promosi dapat dibiayakan sebesar:",
+    options: [
+      "Semua biaya pemasaran/promosi yang dilaporkan dalam laporan keuangan secara akuntansi (komersial)",
+      "Semua biaya pemasaran/promosi yang dilaporkan dalam laporan keuangan secara akuntansi (komersial) dikurangi dengan sumbangan",
+      "Semua biaya pemasaran/promosi yang dilaporkan dalam laporan keuangan secara akuntansi (komersial) dikurangi dengan sumbangan dan biaya lain yang tidak berhubungan secara langsung dengan pemasaran produk (barang/jasa)",
+    ],
+  },
+] as const;
+
+export const CONF_TEXT =
+  "Berdasarkan rekomendasi yang anda berikan, nyatakan keyakinan anda bahwa saran yang anda berikan akan dapat dipertahankan jika nanti ditantang atau menjadi temuan pemeriksa dalam skala 0 sampai 100%." as const;
+
+/**
+ * Reviu Atasan/Supervisor: PLACEHOLDER until the researcher answers PERTANYAAN A6/Q8
+ * (final text, and whether it differs per cell). To vary it per factor, branch on
+ * `Factors` in `reviewParas()` (components/participant/steps.tsx).
+ */
+export const REVIEW_TITLE = "Reviu Atasan/Supervisor" as const;
+export const REVIEW_SUBJECT = "PT Cahaya Gama, hasil reviu rekomendasi" as const;
+export const REVIEW_BODY = [
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper.",
+  "Maecenas faucibus mollis interdum. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.",
+  "[Isi reviu atasan menunggu materi dari peneliti.]",
+] as const;
+export const REVIEW_FOOT = "Reviu ini dapat dibuka kembali melalui menu Berkas penugasan." as const;
+
+/** Labels of the accounts on the recommendation page (same wording as the client draft). */
+export const REC_LABELS = [
+  ["knowhow", "Biaya know how fee"],
+  ["entertain", "Biaya entertainment"],
+  ["repair", "Biaya perbaikan dan pemeliharaan"],
+  ["marketing", "Biaya pemasaran"],
+] as const;
+
+export const REC_TEXT = {
+  title: "Masukkan besaran biaya berdasarkan saran anda",
+  hint: "Isi dengan angka saja; pemisah ribuan dan total dihitung otomatis.",
+  foot: "Draft klien dapat dilihat di halaman sebelumnya; berkas lain di menu Berkas penugasan.",
+} as const;
+
+export const CASES_TEXT = {
+  title: "Daftar kasus acuan",
+  lead: "Klik <strong>DETAIL</strong> untuk membaca informasi lengkap setiap kasus. Isi <strong>peringkat 1–14</strong> berdasarkan pentingnya kasus bagi anda (setiap angka hanya dipakai sekali) dan pilih <strong>Ya</strong> atau <strong>Tidak</strong> untuk menentukan apakah kasus akan anda acu dalam rekomendasi.",
+  head: "14 kasus acuan · keterangan ringkas",
+  headHint: "Peringkat 1 = paling penting · setiap angka hanya dipakai sekali",
+  foot: "Perhatikan sisa waktu anda.",
+} as const;
+
+/** Names of the reference files in the menu Berkas penugasan. */
+export const REF_LABELS = {
+  facts: "Fakta Klien",
+  minutes: "Berita Acara",
+  memo: "Memo Penugasan",
+  review: "Reviu Atasan",
+} as const;

@@ -12,6 +12,7 @@ import { EMPTY, arrowDelta, dateTimeWib, durationText, rankShift, rupiah, rupiah
 import { positionLabel } from "@/lib/pages";
 import { CASE_COUNT, REC_ACCOUNTS, pad2, type Metrics, type TimelineEntry } from "@/lib/metrics";
 import { ParticipantActions } from "../ParticipantActions";
+import { ResetSession } from "../ResetSession";
 import styles from "./detail.module.css";
 
 type Props = {
@@ -24,6 +25,7 @@ type Props = {
   canExport: boolean;
   canChangeCell: boolean;
   canDeactivate: boolean;
+  canReset: boolean;
 };
 
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
@@ -125,6 +127,9 @@ export function DetailView(props: Props) {
               <a className={ui.buttonSecondary} href={`/api/admin/export/events?format=csv&code=${p.code}`}>
                 Unduh event log ({props.eventCount})
               </a>
+            ) : null}
+            {props.canReset && (p.status === "in_progress" || p.status === "timed_out") ? (
+              <ResetSession id={p.id} code={p.code} />
             ) : null}
             {p.status === "not_started" ? (
               <ParticipantActions

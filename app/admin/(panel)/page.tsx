@@ -5,7 +5,10 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { can } from "@/lib/auth/roles";
 import { CELL_LABELS, computeTotals, findLaggingCells, progressRatio } from "@/lib/dashboard";
 import { getBatchCount, getCellSummary, getDashboardSettings } from "@/lib/db/dashboard";
+import { listLive } from "@/lib/db/admin-ops";
 import { closeStaleSessions } from "@/lib/db/participant-flow";
+import { LivePanel } from "./LivePanel";
+import { TargetForm } from "./TargetForm";
 
 export const metadata = { title: "Dasbor · Taxlab Admin" };
 
@@ -20,10 +23,11 @@ export default async function DashboardPage() {
   const admin = await requireAdmin();
   // Abandoned sessions become "timed_out" before counting (FSD-Participant §6.3).
   await closeStaleSessions();
-  const [cells, settings, batchCount] = await Promise.all([
+  const [cells, settings, batchCount, live] = await Promise.all([
     getCellSummary(),
     getDashboardSettings(),
     getBatchCount(),
+    listLive(),
   ]);
   const totals = computeTotals(cells, settings.targetPerCell);
   const lagging = findLaggingCells(cells, settings);
@@ -86,11 +90,14 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      <LivePanel initial={live} updatedAt={new Date().toISOString()} />
+
       <section className={shell.card} aria-labelledby="per-cell">
         <div className={styles.cardHead}>
           <h2 id="per-cell">Progres per sel</h2>
           <span>Hanya status Selesai yang dihitung ke target</span>
         </div>
+        {can(admin.role, "settings:edit") ? <TargetForm current={settings.targetPerCell} /> : null}
         {totals.total === 0 ? (
           <div className={shell.emptyState}>
             <p className={shell.emptyTitle}>Belum ada kode akses</p>

@@ -209,6 +209,30 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      archived_sessions: {
+        Row: {
+          id: string;
+          participant_id: string | null;
+          access_code: string;
+          cell: number;
+          reset_by: string | null;
+          reason: string;
+          snapshot: Json;
+          archived_at: string;
+        };
+        Insert: {
+          id?: string;
+          participant_id?: string | null;
+          access_code: string;
+          cell: number;
+          reset_by?: string | null;
+          reason: string;
+          snapshot: Json;
+          archived_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       login_attempts: {
         Row: { id: number; email: string; success: boolean; ip: string | null; created_at: string };
         Insert: { id?: never; email: string; success: boolean; ip?: string | null; created_at?: string };
@@ -249,6 +273,14 @@ export type Database = {
       deactivate_participant: {
         Args: { p_admin_id: string; p_participant_id: string; p_reason: string };
         Returns: string;
+      };
+      reset_session: {
+        Args: { p_participant_id: string; p_admin_id: string; p_reason: string };
+        Returns: string;
+      };
+      delete_contacts: {
+        Args: { p_admin_id: string; p_batch_id: string | null };
+        Returns: number;
       };
       participant_login: {
         Args: {

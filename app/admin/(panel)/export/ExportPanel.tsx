@@ -9,13 +9,49 @@ import styles from "./export.module.css";
 
 type Batch = { id: string; label: string | null };
 
-export function ExportPanel({ batches, canContacts }: { batches: Batch[]; canContacts: boolean }) {
+export function ExportPanel({
+  batches,
+  canContacts,
+  canDeleteContacts = false,
+}: {
+  batches: Batch[];
+  canContacts: boolean;
+  canDeleteContacts?: boolean;
+}) {
   const [filter, setFilter] = useState<ExportFilter>(DEFAULT_FILTER);
   const [count, setCount] = useState<number | null>(null);
   const [failed, setFailed] = useState(false);
   const [ack, setAck] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [delBatch, setDelBatch] = useState("");
+  const [delConfirm, setDelConfirm] = useState("");
+  const [delBusy, setDelBusy] = useState(false);
+  const [delMessage, setDelMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function deleteContacts(event: React.FormEvent) {
+    event.preventDefault();
+    setDelBusy(true);
+    setDelMessage(null);
+    try {
+      const res = await fetch("/api/admin/contacts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: delConfirm, batchId: delBatch || null }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        setDelMessage({ ok: false, text: body?.error?.message ?? "Terjadi kesalahan. Coba lagi." });
+        return;
+      }
+      setDelConfirm("");
+      setDelMessage({ ok: true, text: `${body.deleted} data kontak dihapus.` });
+    } catch {
+      setDelMessage({ ok: false, text: "Gagal menghubungi server. Coba lagi." });
+    } finally {
+      setDelBusy(false);
+    }
+  }
 
   const query = useMemo(() => filterToParams(filter).toString(), [filter]);
 
@@ -216,6 +252,46 @@ export function ExportPanel({ batches, canContacts }: { batches: Batch[]; canCon
                 </button>
               </div>
             </div>
+          </section>
+        ) : null}
+
+        {canDeleteContacts ? (
+          <section className={`${shell.card} ${styles.contactCard}`} aria-labelledby="exp-delete">
+            <div className={ui.cardHead}>
+              <h2 id="exp-delete">Hapus data kontak</h2>
+              <span>Hanya admin</span>
+            </div>
+            <form className={styles.cardBody} onSubmit={deleteContacts}>
+              <p>
+                Menghapus nama, email, e-wallet, dan No HP setelah insentif dibayar. Jawaban penelitian tidak
+                berubah. Penghapusan tidak bisa dibatalkan dan dicatat di audit log.
+              </p>
+              <div className={ui.field}>
+                <label htmlFor="del-batch">Cakupan</label>
+                <select id="del-batch" value={delBatch} onChange={(e) => setDelBatch(e.target.value)}>
+                  <option value="">Semua batch</option>
+                  {batches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.label ?? "Tanpa label"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className={ui.field}>
+                <label htmlFor="del-confirm">Ketik HAPUS untuk mengonfirmasi</label>
+                <input id="del-confirm" value={delConfirm} onChange={(e) => setDelConfirm(e.target.value)} autoComplete="off" />
+              </div>
+              {delMessage ? (
+                <p className={delMessage.ok ? ui.muted : ui.error} role={delMessage.ok ? "status" : "alert"}>
+                  {delMessage.text}
+                </p>
+              ) : null}
+              <div className={styles.buttons}>
+                <button type="submit" className={ui.buttonDanger} disabled={delConfirm !== "HAPUS" || delBusy}>
+                  {delBusy ? "Menghapus…" : "Hapus data kontak"}
+                </button>
+              </div>
+            </form>
           </section>
         ) : null}
       </div>

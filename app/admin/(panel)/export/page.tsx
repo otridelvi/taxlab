@@ -19,7 +19,7 @@ export default async function Page() {
           <p className={shell.pageSubtitle}>Dataset, event log, dan codebook siap analisis (XLSX atau CSV).</p>
         </div>
       </div>
-      <ExportPanel batches={batches.map((b) => ({ id: b.id, label: b.label }))} canContacts={can(admin.role, "export:contacts")} />
+      <ExportPanel batches={batches.map((b) => ({ id: b.id, label: b.label }))} canContacts={can(admin.role, "export:contacts")} canDeleteContacts={can(admin.role, "contacts:delete")} />
     </>
   );
 }

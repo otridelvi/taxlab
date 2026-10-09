@@ -84,6 +84,7 @@ export const createBatchSchema = z
   .refine((v) => v.mode !== "manual" || v.cell != null, { message: "Pilih sel tujuan.", path: ["cell"] });
 
 export const changeCellSchema = z.object({ cell: z.number().int().min(1).max(4), reason: reasonSchema });
+export const resetSchema = z.object({ reason: reasonSchema, confirmCode: z.string().trim().toUpperCase() });
 export const deactivateSchema = z.object({ reason: reasonSchema });
 
 // ---------------------------------------------------------------- export of codes

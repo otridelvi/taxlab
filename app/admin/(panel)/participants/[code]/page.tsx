@@ -33,6 +33,7 @@ export default async function Page({ params }: PageProps<"/admin/participants/[c
       canExport={can(admin.role, "export:dataset")}
       canChangeCell={can(admin.role, "participants:change-cell")}
       canDeactivate={can(admin.role, "participants:deactivate")}
+      canReset={can(admin.role, "participants:reset")}
     />
   );
 }

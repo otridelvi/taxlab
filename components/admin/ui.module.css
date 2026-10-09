@@ -264,3 +264,12 @@
   color: #1f4a27;
   font-size: 14px;
 }
+
+/* PLAN-07b: sensitive audit rows, live monitor */
+.sensitive td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-danger);
+}
+.inactive {
+  color: var(--color-warning-ink);
+  font-weight: 600;
+}

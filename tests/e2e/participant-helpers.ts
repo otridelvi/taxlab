@@ -1,5 +1,5 @@
 import { expect, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { FLOW_A, rankKey, saveKey } from "../../content/flow";
+import { FLOW_A, FLOW_B, rankKey, saveKey } from "../../content/flow";
 import { generateAccessCodes } from "../../lib/access-code";
 import { ACCOUNTS, serviceClient } from "./fixtures";
 
@@ -56,7 +56,12 @@ export async function participant(code: string) {
   return data!;
 }
 
-export async function consentAndLogin(page: Page, code: string) {
+/**
+ * Consent + login through the UI. The participant is then put on `flow` (default A, so the
+ * PLAN-03/04 specs keep testing flow A whatever settings.flow_version says; PLAN-05 specs ask
+ * for B). Both flows start on "welcome", so switching right after login is safe.
+ */
+export async function consentAndLogin(page: Page, code: string, flow: "A" | "B" = "A") {
   await page.goto(`/login?code=${code}`);
   await expect(page).toHaveURL(/\/\?code=/);
   await page.getByRole("checkbox").check();
@@ -65,6 +70,13 @@ export async function consentAndLogin(page: Page, code: string) {
   await expect(page.getByLabel("Kode akses")).toHaveValue(code);
   await page.getByRole("button", { name: "Masuk" }).click();
   await expect(page).toHaveURL(/\/task/);
+  const db = serviceClient();
+  const { data } = await db.from("participants").select("flow_version").eq("access_code", code).single();
+  if (data?.flow_version !== flow) {
+    const { error } = await db.from("participants").update({ flow_version: flow }).eq("access_code", code);
+    if (error) throw new Error(`consentAndLogin: ${error.message}`);
+    await page.goto("/task");
+  }
 }
 
 export async function clickNext(page: Page, label = "Next") {
@@ -184,10 +196,16 @@ export async function eventsOf(code: string, types?: string[]): Promise<EventRow
  * is inside the task part. Reload /task afterwards.
  */
 export async function jumpTo(code: string, pageId: string) {
-  const idx = FLOW_A.findIndex((s) => s.id === pageId);
+  const { data: p } = await serviceClient()
+    .from("participants")
+    .select("flow_version")
+    .eq("access_code", code)
+    .single();
+  const flow = p?.flow_version === "A" ? FLOW_A : FLOW_B;
+  const idx = flow.findIndex((s) => s.id === pageId);
   if (idx < 0) throw new Error(`Unknown step ${pageId}`);
-  const start = FLOW_A.findIndex((s) => s.timer === "start");
-  const end = FLOW_A.findIndex((s) => s.timer === "end");
+  const start = flow.findIndex((s) => s.timer === "start");
+  const end = flow.findIndex((s) => s.timer === "end");
   const update: {
     current_page: string;
     current_round: number | null;
@@ -196,7 +214,7 @@ export async function jumpTo(code: string, pageId: string) {
     task_end_at?: string | null;
   } = {
     current_page: pageId,
-    current_round: FLOW_A[idx].round ?? null,
+    current_round: flow[idx].round ?? null,
   };
   if (idx >= start && idx <= end) {
     update.task_started_at = new Date(Date.now() - 60_000).toISOString();

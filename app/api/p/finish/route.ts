@@ -7,7 +7,9 @@ import { finishSession } from "@/lib/db/participant-flow";
 export async function POST() {
   const session = await requireActiveSession();
   if (session instanceof Response) return session;
-  const result = await finishSession(session.participant.id, session.token.sessionId, FINISH_STEP_ID);
+  // Flow A ends on its own "finish" page; in flow B the debriefing page ends the session (PLAN-05 D-12).
+  const finishPage = session.step.ends ? session.step.id : FINISH_STEP_ID;
+  const result = await finishSession(session.participant.id, session.token.sessionId, finishPage);
   if (result === "not_at_finish") return pError(409, "NOT_AT_FINISH", P_MESSAGES.notAtFinish);
   if (result === "session_replaced") return pError(409, "SESSION_REPLACED", P_MESSAGES.sessionReplaced);
   if (result !== "ok") return pError(409, "NOT_ACTIVE", P_MESSAGES.unauthenticated);

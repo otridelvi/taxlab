@@ -254,6 +254,8 @@ export const REC_TEXT = {
   title: "Masukkan besaran biaya berdasarkan saran anda",
   hint: "Isi dengan angka saja; pemisah ribuan dan total dihitung otomatis.",
   foot: "Draft klien dapat dilihat di halaman sebelumnya; berkas lain di menu Berkas penugasan.",
+  /** Flow B: the client draft is on the same page. */
+  footB: "Berkas lain dapat dibuka di menu Berkas penugasan.",
 } as const;
 
 export const CASES_TEXT = {
@@ -270,4 +272,34 @@ export const REF_LABELS = {
   minutes: "Berita Acara",
   memo: "Memo Penugasan",
   review: "Reviu Atasan",
+} as const;
+
+/** Flow B (B-12): no letters; "A dan B benar" becomes "Kedua jawaban di atas benar". Same option order and numbering. */
+export const COV_B = COV.map((q) => ({
+  legend: q.legend,
+  options: q.options.map((o) => (o === "A dan B benar" ? "Kedua jawaban di atas benar" : o)),
+}));
+
+/** Flow B: closed documents ("berkas masuk") and the instruction sections. */
+export const ENVELOPE = {
+  kick: "Berkas masuk",
+  memo: { title: "Memo Penugasan", subject: "PT Cahaya Gama, rekonsiliasi fiskal", button: "Buka memo" },
+  review: {
+    title: "Reviu Atasan/Supervisor",
+    subject: "PT Cahaya Gama, hasil reviu rekomendasi",
+    intro: "Anda menerima dokumen reviu dari atasan anda.",
+    button: "Buka reviu",
+  },
+} as const;
+
+export const INSTRUCTION_TITLES = [
+  "Peran dan tugas anda",
+  "Aturan penugasan",
+  "Informasi kasus acuan",
+] as const;
+
+/** Flow B file map (B-10). */
+export const FILE_MAP = {
+  label: "Berkas klien",
+  states: { done: "Sudah dibaca", now: "Sedang dibaca", todo: "Belum diterima" },
 } as const;

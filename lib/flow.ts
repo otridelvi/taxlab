@@ -1,4 +1,4 @@
-import { FLOW_A, TIME_UP_STEP, type Step } from "@/content/flow";
+import { FLOW_A, FLOW_B, TIME_UP_STEP, type Step } from "@/content/flow";
 import type { Factors } from "./cell";
 import { stepProblems, type ItemSpec, type ItemValues, type StepProblems } from "./items";
 import type { FlowVersion } from "./db/types";
@@ -10,9 +10,8 @@ export const FINISH_STEP_ID = "finish";
 export const TIME_UP_STEP_ID = TIME_UP_STEP.id;
 
 export function getFlow(version: FlowVersion | null | undefined): readonly Step[] {
-  // Alur B is added once the researcher chooses (PERTANYAAN A1); until then A is used.
-  void version;
-  return FLOW_A;
+  // B is the default (PLAN-05, PERTANYAAN A1 answered provisionally); A stays available.
+  return version === "A" ? FLOW_A : FLOW_B;
 }
 
 export function getStep(flow: readonly Step[], id: string | null | undefined): Step | undefined {

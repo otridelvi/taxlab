@@ -266,6 +266,22 @@ export async function getOpenedCases(participantId: string, round: 1 | 2): Promi
   return [...numbers].sort((a, b) => a - b);
 }
 
+/**
+ * Documents the participant has opened with "Buka memo" / "Buka reviu" (events `doc_open`, flow B).
+ * Used to show the open document after a refresh and to let Next through (PLAN-05 D-3, D-4).
+ */
+export async function getOpenedDocs(participantId: string): Promise<("memo" | "review")[]> {
+  const { data, error } = await serviceClient()
+    .from("events")
+    .select("target")
+    .eq("participant_id", participantId)
+    .eq("type", "doc_open");
+  if (error) throw new Error(`Failed to load opened documents: ${error.message}`);
+  const found = new Set<"memo" | "review">();
+  for (const row of data ?? []) if (row.target === "memo" || row.target === "review") found.add(row.target);
+  return [...found];
+}
+
 /** Marks abandoned sessions as timed_out (FSD-Participant §6.3). Returns the number closed. */
 export async function closeStaleSessions(): Promise<number> {
   const { data, error } = await serviceClient().rpc("close_stale_sessions");

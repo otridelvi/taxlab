@@ -4,6 +4,7 @@ import cases from "@/content/cases.json";
 import * as T from "@/content/text";
 import type { Factors } from "@/lib/cell";
 import type { CaseView } from "./CasesBoard";
+import { OpenDocButton } from "./OpenDoc";
 import type { RefKey } from "./RefMenu";
 import s from "./p.module.css";
 
@@ -191,6 +192,142 @@ export function ReviewDoc({ f, level = 1 }: { f: Factors; level?: 1 | 2 }) {
   );
 }
 
+function RoleBody() {
+  return (
+    <>
+      <Html html={T.ROLE_P1} />
+      <p>
+        Anda akan membutuhkan waktu sekitar <strong>30 menit</strong> untuk:
+      </p>
+      <ol className={s.steps}>
+        {T.ROLE_STEPS.map((t, i) => (
+          <li key={t}>
+            <span>{i + 1}</span>
+            {t}
+          </li>
+        ))}
+      </ol>
+      <Html html={T.ROLE_P2} />
+    </>
+  );
+}
+
+/** Flow B (B-5): the Berita Acara as official minutes: letterhead, number and the parties. */
+function NotulenHead({ level = 1 }: { level?: 1 | 2 }) {
+  return (
+    <>
+      <Kop refNo="BA/[NOMOR]" />
+      <DocTitle level={level}>Ikhtisar Berita Acara Pertemuan dengan Manajemen Klien</DocTitle>
+      <dl className={s.meta}>
+        <div>
+          <dt>Klien</dt>
+          <dd>PT Cahaya Gama</dd>
+        </div>
+        <div>
+          <dt>Pihak</dt>
+          <dd>Manajemen klien</dd>
+        </div>
+        <div>
+          <dt>Tanggal</dt>
+          <dd>[TANGGAL]</dd>
+        </div>
+        <div>
+          <dt>Perihal</dt>
+          <dd>Rekonsiliasi fiskal</dd>
+        </div>
+      </dl>
+    </>
+  );
+}
+
+function MinutesBody({ f }: { f: Factors }) {
+  return f.pref === "impl" ? <Html html={T.MIN_IMPL} /> : <Paras list={T.MIN_EXPL} />;
+}
+
+/** Flow B (B-3, B-4): a closed document that arrives in the inbox; the button opens it. */
+function Envelope({
+  target,
+  title,
+  subject,
+  intro,
+  button,
+}: {
+  target: "memo" | "review";
+  title: string;
+  subject: string;
+  intro: readonly string[];
+  button: string;
+}) {
+  return (
+    <Sheet doc={false}>
+      <div className={s.env}>
+        <div className={s.envhead}>
+          <div className={s.envico} aria-hidden="true">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M3 5h18v14H3zM3 6l9 7 9-7" />
+            </svg>
+          </div>
+          <div>
+            <div className={s.kick}>{T.ENVELOPE.kick}</div>
+            <h1 className={s.title} style={{ margin: "2px 0 0", fontSize: 28 }}>
+              {title}
+            </h1>
+          </div>
+        </div>
+        <dl className={s.dl} style={{ width: "100%", margin: 0 }}>
+          <dt>Dari</dt>
+          <dd>Manajer Pajak</dd>
+          <dt>Untuk</dt>
+          <dd>Staf Pajak</dd>
+          <dt>Perihal</dt>
+          <dd>{subject}</dd>
+        </dl>
+        <Paras list={intro} />
+        <OpenDocButton target={target} label={button} />
+      </div>
+    </Sheet>
+  );
+}
+
+/** The case instructions (flow A: page; flow B round 2: banner above the list). */
+function CasesIntroBody({ banner }: { banner?: boolean }) {
+  return (
+    <>
+      <div className={s.kick}>Kasus acuan</div>
+      {banner ? (
+        <h2 className={s.title}>Mempelajari kasus serupa</h2>
+      ) : (
+        <h1 className={s.title}>Mempelajari kasus serupa</h1>
+      )}
+      <Paras list={T.CASES_INTRO} />
+      <ul className={s.points}>
+        {T.CASES_LIST.map((t) => (
+          <Html key={t} as="li" html={t} />
+        ))}
+      </ul>
+      <div className={s.callout} style={{ margin: "8px 0 20px" }}>
+        <strong className={s.lbl}>Perintah memeringkat dan menyimpan</strong>
+        <span dangerouslySetInnerHTML={{ __html: T.RANK_ORDER }} />
+      </div>
+      <div className={s.note} style={{ marginBottom: 20 }}>
+        <strong className={s.lbl}>Perhatian</strong>
+        {T.ATTN}
+      </div>
+      <p className={s.muted} style={{ fontFamily: "var(--font-sans)" }}>
+        {banner ? "" : "Kasus-kasus tersebut disajikan mulai dari halaman berikutnya. "}
+        {T.CASES_FOOT}
+      </p>
+    </>
+  );
+}
+
 function FactsIntro() {
   return (
     <>
@@ -229,7 +366,11 @@ function RefHead({ title }: { title: string }) {
  * The reference files of the menu Berkas penugasan, in the variant of the participant's
  * cell. Rendered on the server; only the files the step offers are sent (PLAN-04 D-8).
  */
-export function refDocs(f: Factors, keys: readonly RefKey[]): Partial<Record<RefKey, ReactNode>> {
+export function refDocs(
+  f: Factors,
+  keys: readonly RefKey[],
+  flow: "A" | "B" = "A",
+): Partial<Record<RefKey, ReactNode>> {
   const all: Record<RefKey, () => ReactNode> = {
     facts: () => (
       <>
@@ -241,12 +382,19 @@ export function refDocs(f: Factors, keys: readonly RefKey[]): Partial<Record<Ref
         <Accounts from={0} to={4} />
       </>
     ),
-    minutes: () => (
-      <>
-        <RefHead title="Ikhtisar Berita Acara Pertemuan dengan Manajemen Klien" />
-        {f.pref === "impl" ? <Html html={T.MIN_IMPL} /> : <Paras list={T.MIN_EXPL} />}
-      </>
-    ),
+    minutes: () =>
+      flow === "B" ? (
+        <>
+          <div className={s.kick}>Berkas penugasan</div>
+          <NotulenHead level={2} />
+          <MinutesBody f={f} />
+        </>
+      ) : (
+        <>
+          <RefHead title="Ikhtisar Berita Acara Pertemuan dengan Manajemen Klien" />
+          <MinutesBody f={f} />
+        </>
+      ),
     memo: () => <MemoDoc strong={f.acc === "strong"} level={2} />,
     review: () => <ReviewDoc f={f} level={2} />,
   };
@@ -260,10 +408,22 @@ export type StepView = {
   fieldsIntro?: string;
   /** Kick + h1 of the items sheet (steps that are only their items). */
   heading?: { kick: string; title: string };
+  /** Flow B: the document of the step is closed (items hidden, Next off). */
+  locked?: boolean;
+};
+
+export type StepContext = {
+  flow: "A" | "B";
+  /** Flow B: the participant already opened this step's document (memo / review). */
+  docOpened: boolean;
 };
 
 /** Content for a step. Steps built in later plans render a placeholder (PLAN-03 D-8). */
-export function stepView(step: Step, f: Factors): StepView {
+export function stepView(
+  step: Step,
+  f: Factors,
+  ctx: StepContext = { flow: "A", docOpened: true },
+): StepView {
   switch (step.id) {
     case "welcome":
       return {
@@ -299,19 +459,27 @@ export function stepView(step: Step, f: Factors): StepView {
         content: (
           <Sheet>
             <Head kick="Petunjuk · peran anda" title="Peran dan tugas anda" />
-            <Html html={T.ROLE_P1} />
-            <p>
-              Anda akan membutuhkan waktu sekitar <strong>30 menit</strong> untuk:
-            </p>
-            <ol className={s.steps}>
-              {T.ROLE_STEPS.map((t, i) => (
-                <li key={t}>
-                  <span>{i + 1}</span>
-                  {t}
-                </li>
-              ))}
-            </ol>
-            <Html html={T.ROLE_P2} />
+            <RoleBody />
+          </Sheet>
+        ),
+      };
+    case "instructions":
+      return {
+        content: (
+          <Sheet>
+            <Head kick="Petunjuk" title="Petunjuk penugasan" />
+            <section className={s.part}>
+              <h2 className={s.h2}>1. {T.INSTRUCTION_TITLES[0]}</h2>
+              <RoleBody />
+            </section>
+            <section className={s.part}>
+              <h2 className={s.h2}>2. {T.INSTRUCTION_TITLES[1]}</h2>
+              <Paras list={T.RULES} />
+            </section>
+            <section className={s.part}>
+              <h2 className={s.h2}>3. {T.INSTRUCTION_TITLES[2]}</h2>
+              <Paras list={T.CASEINFO} />
+            </section>
           </Sheet>
         ),
       };
@@ -335,10 +503,13 @@ export function stepView(step: Step, f: Factors): StepView {
       };
     case "facts_1":
       return {
-        footNote: "Halaman 1 dari 4",
+        footNote: ctx.flow === "B" ? "Halaman 1 dari 2" : "Halaman 1 dari 4",
         content: (
           <Sheet>
-            <Head kick="Fakta Klien · 1 dari 4" title="Fakta Klien" />
+            <Head
+              kick={ctx.flow === "B" ? "Fakta Klien · 1 dari 2" : "Fakta Klien · 1 dari 4"}
+              title="Fakta Klien"
+            />
             <FactsIntro />
           </Sheet>
         ),
@@ -379,15 +550,52 @@ export function stepView(step: Step, f: Factors): StepView {
           </Sheet>
         ),
       };
+    case "facts_costs":
+      return {
+        footNote: "Halaman 2 dari 2",
+        content: (
+          <Sheet>
+            <Head kick="Fakta Klien · 2 dari 2" title="Biaya yang masih meragukan" />
+            <Paras list={T.FACT2_P} />
+            <div className={s.acards}>
+              {T.ACCT.map(([name, text], i) => (
+                <div key={name} className={s.acard}>
+                  <div className={s.ah}>
+                    <b>
+                      {i + 1}. {name}
+                    </b>
+                    <span>{T.COSTS_FACT[i][1]}</span>
+                  </div>
+                  <Html html={text} />
+                </div>
+              ))}
+            </div>
+            <div className={s.atotal}>
+              <b>Total</b>
+              <span>Rp1.000.000.000</span>
+            </div>
+            <div className={s.note} style={{ marginTop: 24 }}>
+              <strong className={s.lbl}>Catatan</strong>
+              {T.NOTEPAD}
+            </div>
+          </Sheet>
+        ),
+      };
     case "minutes":
       return {
         fieldsTitle: "Kesan anda dari pertemuan",
-        content: (
-          <Sheet>
-            <Head kick="Berkas klien" title="Ikhtisar Berita Acara Pertemuan dengan Manajemen Klien" />
-            {f.pref === "impl" ? <Html html={T.MIN_IMPL} /> : <Paras list={T.MIN_EXPL} />}
-          </Sheet>
-        ),
+        content:
+          ctx.flow === "B" ? (
+            <Sheet>
+              <NotulenHead />
+              <MinutesBody f={f} />
+            </Sheet>
+          ) : (
+            <Sheet>
+              <Head kick="Berkas klien" title="Ikhtisar Berita Acara Pertemuan dengan Manajemen Klien" />
+              <MinutesBody f={f} />
+            </Sheet>
+          ),
       };
     case "memo_intro":
       return {
@@ -399,6 +607,20 @@ export function stepView(step: Step, f: Factors): StepView {
         ),
       };
     case "memo":
+      if (step.gate && !ctx.docOpened) {
+        return {
+          locked: true,
+          content: (
+            <Envelope
+              target="memo"
+              title={T.ENVELOPE.memo.title}
+              subject={T.ENVELOPE.memo.subject}
+              intro={T.MEMO_INTRO.slice(0, 1)}
+              button={T.ENVELOPE.memo.button}
+            />
+          ),
+        };
+      }
       return {
         fieldsTitle: "Identitas staf",
         fieldsIntro: "Sesuai memo, cantumkan nama dan alamat email anda sebelum melanjutkan.",
@@ -413,24 +635,7 @@ export function stepView(step: Step, f: Factors): StepView {
       return {
         content: (
           <Sheet>
-            <Head kick="Kasus acuan" title="Mempelajari kasus serupa" />
-            <Paras list={T.CASES_INTRO} />
-            <ul className={s.points}>
-              {T.CASES_LIST.map((t) => (
-                <Html key={t} as="li" html={t} />
-              ))}
-            </ul>
-            <div className={s.callout} style={{ margin: "8px 0 20px" }}>
-              <strong className={s.lbl}>Perintah memeringkat dan menyimpan</strong>
-              <span dangerouslySetInnerHTML={{ __html: T.RANK_ORDER }} />
-            </div>
-            <div className={s.note} style={{ marginBottom: 20 }}>
-              <strong className={s.lbl}>Perhatian</strong>
-              {T.ATTN}
-            </div>
-            <p className={s.muted} style={{ fontFamily: "var(--font-sans)" }}>
-              Kasus-kasus tersebut disajikan mulai dari halaman berikutnya. {T.CASES_FOOT}
-            </p>
+            <CasesIntroBody />
           </Sheet>
         ),
       };
@@ -457,7 +662,16 @@ export function stepView(step: Step, f: Factors): StepView {
       };
     case "cases_r1":
     case "cases_r2":
-      return { footNote: T.CASES_TEXT.foot, content: null };
+      // Flow B (B-7): the round 2 instructions sit above the list as a banner.
+      return {
+        footNote: T.CASES_TEXT.foot,
+        content:
+          ctx.flow === "B" && step.id === "cases_r2" ? (
+            <Sheet>
+              <CasesIntroBody banner />
+            </Sheet>
+          ) : null,
+      };
     case "covariates":
       return {
         heading: { kick: "Pertanyaan", title: "Pertanyaan pengetahuan" },
@@ -466,6 +680,23 @@ export function stepView(step: Step, f: Factors): StepView {
       };
     case "rec_r1":
     case "rec_r2":
+      // Flow B (B-6): the client draft sits above, as its own read-only table.
+      if (ctx.flow === "B") {
+        return {
+          fieldsTitle: T.REC_TEXT.title,
+          fieldsIntro: T.REC_TEXT.hint,
+          footNote: T.REC_TEXT.footB,
+          content: (
+            <Sheet>
+              <Head kick="Rekomendasi" title="Menyusun rekomendasi" />
+              <Html html={step.id === "rec_r1" ? T.REC_INTRO_1 : T.REC_INTRO_2} />
+              <h2 className={s.h2}>Usulan biaya menurut draft klien</h2>
+              <p>Berikut ditampilkan kembali usulan biaya berdasarkan draft yang disiapkan klien.</p>
+              <Ledger rows={T.COSTS_DRAFT} />
+            </Sheet>
+          ),
+        };
+      }
       return {
         heading: { kick: "Rekomendasi", title: T.REC_TEXT.title },
         fieldsIntro: T.REC_TEXT.hint,
@@ -480,6 +711,20 @@ export function stepView(step: Step, f: Factors): StepView {
         content: null,
       };
     case "review":
+      if (step.gate && !ctx.docOpened) {
+        return {
+          locked: true,
+          content: (
+            <Envelope
+              target="review"
+              title={T.ENVELOPE.review.title}
+              subject={T.ENVELOPE.review.subject}
+              intro={[T.ENVELOPE.review.intro]}
+              button={T.ENVELOPE.review.button}
+            />
+          ),
+        };
+      }
       return {
         footNote: T.REVIEW_FOOT,
         content: (
@@ -520,7 +765,7 @@ export function stepView(step: Step, f: Factors): StepView {
           <Sheet doc={false}>
             <Head kick="Segera hadir" title="Halaman ini disiapkan pada tahap berikutnya" />
             <p className={s.muted}>
-              Pratinjau SIT: isi halaman <code>{step.id}</code> dibangun pada PLAN-04/05. Tekan Next untuk
+              Pratinjau SIT: isi halaman <code>{step.id}</code> dibangun pada PLAN-06. Tekan Next untuk
               melanjutkan alur.
             </p>
           </Sheet>

@@ -12,6 +12,7 @@ export const P_MESSAGES = {
   stalePage: "Halaman sudah berganti. Memuat halaman terbaru…",
   invalidItem: "Isian tidak valid.",
   notAtFinish: "Halaman penutup belum tercapai.",
+  docNotOpened: "Buka dokumennya terlebih dahulu sebelum melanjutkan.",
   network: "Tidak bisa terhubung. Periksa koneksi lalu coba lagi.",
   saving: "Belum tersimpan, mencoba lagi…",
   server: "Terjadi kesalahan di server. Coba lagi sebentar lagi.",

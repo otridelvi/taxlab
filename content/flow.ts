@@ -1,6 +1,6 @@
 import type { Factors } from "@/lib/cell";
 import type { ItemSpec } from "@/lib/items";
-import { COV, MINUTES_QUESTIONS, REC_LABELS } from "./text";
+import { COV, COV_B, MINUTES_QUESTIONS, REC_LABELS } from "./text";
 
 /**
  * Participant flow as configuration (FSD-Participant §4). The page shown is
@@ -50,6 +50,16 @@ export type Step = {
   items?: (f: Factors) => ItemSpec[];
   /** Label of the Next button. */
   next?: string;
+  /**
+   * Flow B (PLAN-05 D-3): the document arrives closed; its content and items appear after the
+   * button "Buka …" (event doc_open) and Next stays disabled until then. The server refuses
+   * to advance without the event.
+   */
+  gate?: "memo" | "review";
+  /** Flow B (B-10): the file map is shown beside the page; the value is the file this page is about. */
+  map?: "facts" | "minutes" | "memo";
+  /** Flow B (B-9): the page itself ends the session with the button "Survey Selesai". */
+  ends?: boolean;
 };
 
 /** Section label in the header. Never mentions rounds (FSD §9.2). */
@@ -111,6 +121,17 @@ const covariateItems = (): ItemSpec[] =>
     options: q.options,
     name: `jawaban pertanyaan ${i + 1}`,
     letters: true,
+    number: i + 1,
+  }));
+
+/** Flow B (B-12): same keys and option order, no a/b/c letters, "Kedua jawaban di atas benar". */
+const covariateItemsB = (): ItemSpec[] =>
+  COV_B.map((q, i) => ({
+    key: `cov_q${i + 1}`,
+    type: "choice" as const,
+    legend: q.legend,
+    options: q.options,
+    name: `jawaban pertanyaan ${i + 1}`,
     number: i + 1,
   }));
 
@@ -215,6 +236,48 @@ export const FLOW_A: readonly Step[] = [
   { id: "demographics", kind: "demographics", section: "quest" },
   { id: "debriefing", kind: "text", section: "end" },
   { id: "finish", kind: "finish", section: "end" },
+];
+
+/**
+ * Alur B (Opsi B, PLAN-05): 18 steps (+ consent and login = 20 pages). Same item keys as
+ * flow A (PR-3). B-6: client draft above the answer fields; B-11 (notebook) not used.
+ */
+export const FLOW_B: readonly Step[] = [
+  { id: "welcome", kind: "text", section: "welcome", next: "Mulai penugasan" },
+  { id: "instructions", kind: "text", section: "intro", timer: "start", next: "Baca kasus klien" },
+  { id: "facts_1", kind: "facts", section: "files", map: "facts" },
+  { id: "facts_costs", kind: "facts", section: "files", map: "facts" },
+  { id: "minutes", kind: "minutes", section: "files", map: "minutes", items: minutesItems },
+  { id: "memo", kind: "memo", section: "files", map: "memo", gate: "memo", items: memoItems },
+  { id: "cases_intro_r1", kind: "text", section: "cases", round: 1, next: "Lihat kasus acuan" },
+  { id: "cases_r1", kind: "cases", section: "cases", round: 1, menu: M3, items: casesItems(1) },
+  { id: "covariates", kind: "mcq", section: "questions", round: 1, menu: M3, items: covariateItemsB },
+  { id: "rec_r1", kind: "recommendation", section: "recommendation", round: 1, menu: M3, items: recItems(1) },
+  {
+    id: "confidence_r1",
+    kind: "confidence",
+    section: "recommendation",
+    round: 1,
+    menu: M3,
+    items: confidenceItems(1),
+    next: "Simpan",
+  },
+  { id: "review", kind: "review", section: "review", menu: M3, gate: "review" },
+  { id: "cases_r2", kind: "cases", section: "cases", round: 2, menu: M4, items: casesItems(2) },
+  { id: "rec_r2", kind: "recommendation", section: "recommendation", round: 2, menu: M4, items: recItems(2) },
+  {
+    id: "confidence_r2",
+    kind: "confidence",
+    section: "recommendation",
+    round: 2,
+    menu: M4,
+    timer: "end",
+    items: confidenceItems(2),
+    next: "Simpan",
+  },
+  { id: "questionnaire", kind: "mcq", section: "quest" },
+  { id: "demographics", kind: "demographics", section: "quest" },
+  { id: "debriefing", kind: "text", section: "end", ends: true },
 ];
 
 /** System step shown when the task time runs out (not part of the normal order). */

@@ -3,7 +3,7 @@ import { itemsForStep, transition, validateStep } from "@/lib/flow";
 import { hasProblems, problemsMessage, splitItems } from "@/lib/items";
 import { P_MESSAGES } from "@/lib/participant-messages";
 import { pError, readBody, remainingMs, requireActiveSession } from "@/lib/participant-api";
-import { advanceStep, getParticipantSettings } from "@/lib/db/participant-flow";
+import { advanceStep, getOpenedDocs, getParticipantSettings } from "@/lib/db/participant-flow";
 
 const schema = z.object({
   from: z.string().max(40),
@@ -27,6 +27,11 @@ export async function POST(request: Request) {
   if (reason === "timer_expired") {
     // The deadline has not passed by the server clock: nothing to do.
     return Response.json({ page: session.step.id, remaining_ms: remainingMs(session.participant) });
+  }
+
+  // Flow B: a closed document must be opened first (PLAN-05 D-3).
+  if (session.step.gate && !(await getOpenedDocs(session.participant.id)).includes(session.step.gate)) {
+    return pError(422, "DOC_NOT_OPENED", P_MESSAGES.docNotOpened);
   }
 
   const specs = itemsForStep(session.step, session.factors);

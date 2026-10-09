@@ -36,6 +36,8 @@ type Props = {
   /** Case list of a `cases` step, and the cases already opened in this round (server's view). */
   cases?: CaseView[];
   opened?: number[];
+  /** Flow B: the document of this step is still closed; its items are hidden and Next is off. */
+  locked?: boolean;
   children: ReactNode;
 };
 
@@ -80,6 +82,7 @@ export function StepForm({
   heading,
   cases,
   opened = [],
+  locked = false,
   children,
 }: Props) {
   const reload = useReloadStep();
@@ -165,6 +168,7 @@ export function StepForm({
   }
 
   async function next() {
+    if (locked) return;
     const problems = stepProblems(items, valuesRef.current);
     if (hasProblems(problems)) {
       reportProblems(problems);
@@ -223,7 +227,8 @@ export function StepForm({
           onChange={change}
         />
       ) : (
-        items.length > 0 && (
+        items.length > 0 &&
+        !locked && (
           <section className={`${s.sheet} ${s.ui}`} aria-label={fieldsTitle ?? heading?.title}>
             {heading ? (
               <>
@@ -261,7 +266,7 @@ export function StepForm({
               {message}
             </p>
           )}
-          <button type="button" className={s.btn} onClick={() => void next()} disabled={busy}>
+          <button type="button" className={s.btn} onClick={() => void next()} disabled={busy || locked}>
             {nextLabel}
           </button>
         </div>

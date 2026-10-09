@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { P_MESSAGES } from "@/lib/participant-messages";
 import { flushEvents, setCurrentPage, track } from "./events-client";
 import { useReloadStep } from "./use-reload-step";
 import s from "./p.module.css";
 
-/** Last step: "Survey Selesai" ends the session (FSD N-6). */
-export function FinishStep() {
+/**
+ * Last step: "Survey Selesai" ends the session (FSD N-6). In flow B the debriefing page is
+ * the last page: its text is passed as children and the button sits at its end (PLAN-05 D-12).
+ */
+export function FinishStep({ page = "finish", children }: { page?: string; children?: ReactNode }) {
   const reload = useReloadStep();
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -15,8 +18,8 @@ export function FinishStep() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (setCurrentPage("finish")) track("page_view", "finish");
-  }, []);
+    if (setCurrentPage(page)) track("page_view", page);
+  }, [page]);
 
   async function finish() {
     setBusy(true);
@@ -39,6 +42,27 @@ export function FinishStep() {
       setMessage(P_MESSAGES.network);
     }
     setBusy(false);
+  }
+
+  if (children && !done) {
+    return (
+      <>
+        {children}
+        <div className={s.foot}>
+          <span />
+          <div className={s.footRight}>
+            {message && (
+              <p className={s.err} role="alert">
+                {message}
+              </p>
+            )}
+            <button type="button" className={s.btn} onClick={() => void finish()} disabled={busy}>
+              Survey Selesai
+            </button>
+          </div>
+        </div>
+      </>
+    );
   }
 
   return (

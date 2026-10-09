@@ -1,13 +1,19 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SECTION_LABELS } from "@/content/flow";
+import { FileMap } from "@/components/participant/FileMap";
 import { FinishStep } from "@/components/participant/FinishStep";
 import { FirmShell, StudyShell, type TimerInfo } from "@/components/participant/Shell";
 import { StepForm } from "@/components/participant/StepForm";
 import { RefBar, RefButton, RefProvider } from "@/components/participant/RefMenu";
 import { caseViews, refDocs, Sheet, stepView } from "@/components/participant/steps";
 import s from "@/components/participant/p.module.css";
-import { getOpenedCases, getParticipantSettings, getSavedValues } from "@/lib/db/participant-flow";
+import {
+  getOpenedCases,
+  getOpenedDocs,
+  getParticipantSettings,
+  getSavedValues,
+} from "@/lib/db/participant-flow";
 import { itemsForStep, isTaskStep, TIME_UP_STEP_ID } from "@/lib/flow";
 import { applyTimeout, readParticipantSession, remainingMs } from "@/lib/participant-api";
 import { P_MESSAGES } from "@/lib/participant-messages";
@@ -97,44 +103,68 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
     participant.id,
     items.map((i) => i.key),
   );
-  const view = stepView(step, factors);
+  const flowKind = participant.flowVersion === "A" ? "A" : "B";
+  const docOpened = step.gate ? (await getOpenedDocs(participant.id)).includes(step.gate) : true;
+  const view = stepView(step, factors, { flow: flowKind, docOpened });
   const isCases = step.kind === "cases" && step.round !== undefined;
   const opened = isCases ? await getOpenedCases(participant.id, step.round!) : [];
   const menu = step.menu ?? [];
+
+  // Flow B: the debriefing page carries the "Survey Selesai" button itself (PLAN-05 D-12).
+  if (step.ends) {
+    return (
+      <FirmShell section={SECTION_LABELS[step.section]} code={participant.accessCode} timer={timer}>
+        {resumeNotice}
+        <FinishStep page={step.id}>{view.content}</FinishStep>
+      </FirmShell>
+    );
+  }
+
+  const form = (
+    <StepForm
+      key={step.id}
+      page={step.id}
+      kind={step.kind}
+      round={step.round}
+      items={items}
+      initial={initial}
+      nextLabel={step.next ?? "Next"}
+      footNote={view.footNote}
+      fieldsTitle={view.fieldsTitle}
+      fieldsIntro={view.fieldsIntro}
+      heading={view.heading}
+      cases={isCases ? caseViews() : undefined}
+      opened={opened}
+      locked={view.locked}
+    >
+      {view.content}
+    </StepForm>
+  );
 
   const body = (
     <FirmShell
       section={SECTION_LABELS[step.section]}
       code={participant.accessCode}
       timer={timer}
-      wide={isCases}
+      wide={isCases || Boolean(step.map)}
       headerAction={menu.length > 0 ? <RefButton /> : undefined}
     >
       {resumeNotice}
       {menu.length > 0 && <RefBar />}
-      <StepForm
-        key={step.id}
-        page={step.id}
-        kind={step.kind}
-        round={step.round}
-        items={items}
-        initial={initial}
-        nextLabel={step.next ?? "Next"}
-        footNote={view.footNote}
-        fieldsTitle={view.fieldsTitle}
-        fieldsIntro={view.fieldsIntro}
-        heading={view.heading}
-        cases={isCases ? caseViews() : undefined}
-        opened={opened}
-      >
-        {view.content}
-      </StepForm>
+      {step.map ? (
+        <div className={s.mapLayout}>
+          <FileMap current={step.map} />
+          <div className={s.mapMain}>{form}</div>
+        </div>
+      ) : (
+        form
+      )}
     </FirmShell>
   );
 
   // The menu Berkas (PLAN-04) is per step: opening state and the file log reset when the step changes.
   return menu.length > 0 ? (
-    <RefProvider key={step.id} keys={menu} docs={refDocs(factors, menu)}>
+    <RefProvider key={step.id} keys={menu} docs={refDocs(factors, menu, flowKind)}>
       {body}
     </RefProvider>
   ) : (

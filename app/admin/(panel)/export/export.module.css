@@ -1,0 +1,72 @@
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.checks legend {
+  padding: 0;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+.checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.count {
+  margin: 0;
+  padding: 12px 20px;
+  font-size: 14px;
+  color: var(--color-ink-soft);
+  border-bottom: 1px solid var(--color-border-soft);
+}
+.count strong {
+  font-variant-numeric: tabular-nums;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+.cardBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cardBody p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-ink-soft);
+}
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.ack {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  cursor: pointer;
+}
+.ack input {
+  margin-top: 3px;
+}
+.contactCard {
+  border-color: var(--color-danger-ink);
+}

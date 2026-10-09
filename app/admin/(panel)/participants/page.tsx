@@ -174,7 +174,9 @@ export default async function ParticipantsPage({ searchParams }: PageProps<"/adm
                   const dur = formatDuration(p.durationSeconds);
                   return (
                     <tr key={p.id}>
-                      <td className={`${ui.mono} ${p.status === "cancelled" ? ui.struck : ""}`}>{p.code}</td>
+                      <td className={`${ui.mono} ${p.status === "cancelled" ? ui.struck : ""}`}>
+                        <Link href={`/admin/participants/${p.code}`}>{p.code}</Link>
+                      </td>
                       <td title={CELL_LABELS[p.cell]}>Sel {p.cell}</td>
                       <td>{p.batchLabel ?? <span className={ui.muted}>—</span>}</td>
                       <td>

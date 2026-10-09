@@ -1,0 +1,6 @@
+{
+  "mc_q1": { "expl": 1, "impl": 2 },
+  "mc_q2": { "weak": 1, "strong": 2 },
+  "mc_q3": 2,
+  "cov": null
+}

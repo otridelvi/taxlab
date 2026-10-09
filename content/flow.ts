@@ -1,6 +1,7 @@
 import type { Factors } from "@/lib/cell";
 import type { ItemSpec } from "@/lib/items";
-import { COV, COV_B, MINUTES_QUESTIONS, REC_LABELS } from "./text";
+import { COV, COV_B, DEMO_TEXT, MINUTES_QUESTIONS, REC_LABELS } from "./text";
+import { EDUCATION, EWALLETS, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, MC_QUESTIONS } from "./questions";
 
 /**
  * Participant flow as configuration (FSD-Participant §4). The page shown is
@@ -26,6 +27,7 @@ export type StepKind =
   | "memo"
   | "cases"
   | "mcq"
+  | "questionnaire"
   | "draft"
   | "recommendation"
   | "confidence"
@@ -135,6 +137,96 @@ const covariateItemsB = (): ItemSpec[] =>
     number: i + 1,
   }));
 
+const MCQ_GROUP = { id: "mcq", name: "pertanyaan" } as const;
+const LIKERT_GROUP = { id: "likert", name: "pernyataan" } as const;
+
+/** Manipulation check, part A (PLAN-06): three multiple-choice questions, no a/b/c letters. */
+const mcItems = (): ItemSpec[] =>
+  MC_QUESTIONS.map((q, i) => ({
+    key: q.key,
+    type: "choice" as const,
+    legend: q.legend,
+    options: q.options,
+    name: `jawaban pertanyaan ${i + 1}`,
+    number: i + 1,
+    group: MCQ_GROUP,
+  }));
+
+/** Part B: four statements on a 1–5 scale. */
+const likertItems = (): ItemSpec[] =>
+  LIKERT_STATEMENTS.map((statement, i) => ({
+    key: `mc_likert${i + 1}`,
+    type: "likert" as const,
+    statement,
+    labels: LIKERT_LABELS,
+    name: `pernyataan ${i + 1}`,
+    number: i + 1,
+    group: LIKERT_GROUP,
+  }));
+
+/** Flow B: both parts on one page. */
+const questionnaireItems = (): ItemSpec[] => [...mcItems(), ...likertItems()];
+
+/** Demographics and the optional incentive claim (PLAN-06 D-5…D-8). */
+const demographicItems = (): ItemSpec[] => [
+  {
+    key: "semester",
+    type: "integer",
+    name: "semester",
+    label: DEMO_TEXT.semester.label,
+    placeholder: DEMO_TEXT.semester.placeholder,
+    min: 1,
+    max: 20,
+  },
+  {
+    key: "gender",
+    type: "choice",
+    legend: DEMO_TEXT.gender,
+    options: GENDER,
+    name: "jenis kelamin",
+    pills: true,
+  },
+  {
+    key: "age",
+    type: "integer",
+    name: "umur",
+    label: DEMO_TEXT.age.label,
+    unit: DEMO_TEXT.age.unit,
+    min: 15,
+    max: 80,
+  },
+  {
+    key: "education",
+    type: "choice",
+    legend: DEMO_TEXT.education,
+    options: EDUCATION,
+    name: "tingkat pendidikan",
+    pills: true,
+  },
+  {
+    key: "contact_ewallet",
+    type: "select",
+    label: DEMO_TEXT.ewallet,
+    name: "jenis e-wallet",
+    options: EWALLETS,
+    groupLegend: DEMO_TEXT.incentive,
+    contact: "ewallet",
+    requiredWith: "contact_phone",
+    required: false,
+  },
+  {
+    key: "contact_phone",
+    type: "phone",
+    label: DEMO_TEXT.phone,
+    name: "No. HP",
+    maxLength: 20,
+    note: DEMO_TEXT.note,
+    contact: "phone",
+    requiredWith: "contact_ewallet",
+    required: false,
+  },
+];
+
 const recItems = (round: 1 | 2) => (): ItemSpec[] =>
   REC_LABELS.map(([id, label]) => ({
     key: `rec_${id}_r${round}`,
@@ -231,9 +323,9 @@ export const FLOW_A: readonly Step[] = [
     items: confidenceItems(2),
     next: "Simpan",
   },
-  { id: "mc_choice", kind: "mcq", section: "quest" },
-  { id: "mc_likert", kind: "likert", section: "quest" },
-  { id: "demographics", kind: "demographics", section: "quest" },
+  { id: "mc_choice", kind: "mcq", section: "quest", items: mcItems },
+  { id: "mc_likert", kind: "likert", section: "quest", items: likertItems },
+  { id: "demographics", kind: "demographics", section: "quest", items: demographicItems },
   { id: "debriefing", kind: "text", section: "end" },
   { id: "finish", kind: "finish", section: "end" },
 ];
@@ -275,8 +367,8 @@ export const FLOW_B: readonly Step[] = [
     items: confidenceItems(2),
     next: "Simpan",
   },
-  { id: "questionnaire", kind: "mcq", section: "quest" },
-  { id: "demographics", kind: "demographics", section: "quest" },
+  { id: "questionnaire", kind: "questionnaire", section: "quest", items: questionnaireItems },
+  { id: "demographics", kind: "demographics", section: "quest", items: demographicItems },
   { id: "debriefing", kind: "text", section: "end", ends: true },
 ];
 

@@ -132,6 +132,7 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
       footNote={view.footNote}
       fieldsTitle={view.fieldsTitle}
       fieldsIntro={view.fieldsIntro}
+      parts={view.parts}
       heading={view.heading}
       cases={isCases ? caseViews() : undefined}
       opened={opened}

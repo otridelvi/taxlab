@@ -23,6 +23,51 @@ export type ChoiceItem = {
   letters?: boolean;
   /** Question number shown before the legend. */
   number?: number;
+  /** Show the options as pills in a row (gender, education) instead of a list. */
+  pills?: boolean;
+  group?: ItemGroup;
+  required?: boolean;
+};
+
+/** Agreement statement answered on a 1–5 scale (PLAN-06). Stored as the number 1–5. */
+export type LikertItem = {
+  key: string;
+  type: "likert";
+  /** Statement (trusted HTML). */
+  statement: string;
+  /** Five labels, 1 = first. */
+  labels: readonly string[];
+  name: string;
+  number?: number;
+  group?: ItemGroup;
+  required?: boolean;
+};
+
+/** One of a closed list of text values (e-wallet). `requiredWith`: required only when that item is filled. */
+export type SelectItem = {
+  key: string;
+  type: "select";
+  label: string;
+  name: string;
+  options: readonly { value: string; label: string }[];
+  /** Legend of the fieldset the incentive fields are shown in (first item of the group). */
+  groupLegend?: string;
+  contact?: ContactField;
+  requiredWith?: string;
+  required?: boolean;
+};
+
+/** Indonesian mobile number; stored normalised as +62… (PLAN-06 D-7). */
+export type PhoneItem = {
+  key: string;
+  type: "phone";
+  label: string;
+  name: string;
+  maxLength: number;
+  /** Small print under the incentive fields. */
+  note?: string;
+  contact?: ContactField;
+  requiredWith?: string;
   required?: boolean;
 };
 
@@ -47,6 +92,9 @@ export type IntegerItem = {
   max: number;
   /** Shown by the form (e.g. the account name on the recommendation page). */
   label?: string;
+  /** Text after the number (e.g. "tahun") and a hint in the empty field. */
+  unit?: string;
+  placeholder?: string;
   /** Items with the same `unique` id must hold different values (ranks within one round). */
   unique?: string;
   group?: ItemGroup;
@@ -62,7 +110,7 @@ export type BinaryItem = {
   required?: boolean;
 };
 
-export type ItemSpec = ChoiceItem | TextItem | IntegerItem | BinaryItem;
+export type ItemSpec = ChoiceItem | LikertItem | SelectItem | PhoneItem | TextItem | IntegerItem | BinaryItem;
 export type ItemValues = Record<string, unknown>;
 
 /** Largest Rupiah amount accepted: 13 digits (below Number.MAX_SAFE_INTEGER). */
@@ -78,6 +126,21 @@ export function parseRupiah(input: string): number | null {
 /** 125000000 → "125.000.000" (locale independent). */
 export function formatRupiah(n: number): string {
   return String(Math.trunc(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/**
+ * "0812-3456-7890", "812 3456 7890", "62812…" or "+62812…" → "+62812…"; null when it is not a
+ * mobile number (must start with 8 after the country code and have 9–13 digits).
+ */
+export function normalizePhone(input: string): string | null {
+  let t = input.trim().replace(/[\s().-]/g, "");
+  if (!/^\+?\d+$/.test(t)) return null;
+  if (t.startsWith("+")) {
+    if (!t.startsWith("+62")) return null;
+    t = t.slice(3);
+  } else if (t.startsWith("62")) t = t.slice(2);
+  else if (t.startsWith("0")) t = t.slice(1);
+  return /^8\d{8,12}$/.test(t) ? `+62${t}` : null;
 }
 
 const emailSchema = z.email();
@@ -114,6 +177,28 @@ export function checkItem(
       return { ok: false, reason: "invalid" };
     }
     return { ok: true, value: n };
+  }
+  if (spec.type === "likert") {
+    if (isEmptyRaw(raw)) return { ok: false, reason: "empty" };
+    const n = typeof raw === "string" ? Number(raw) : raw;
+    if (typeof n !== "number" || !Number.isInteger(n) || n < 1 || n > spec.labels.length) {
+      return { ok: false, reason: "invalid" };
+    }
+    return { ok: true, value: n };
+  }
+  if (spec.type === "select") {
+    if (isEmptyRaw(raw)) return { ok: false, reason: "empty" };
+    const hit = typeof raw === "string" ? spec.options.find((o) => o.value === raw) : undefined;
+    return hit ? { ok: true, value: hit.value } : { ok: false, reason: "invalid" };
+  }
+  if (spec.type === "phone") {
+    if (raw !== undefined && raw !== null && typeof raw !== "string") return { ok: false, reason: "invalid" };
+    const typed = (raw ?? "").trim();
+    if (typed.length > spec.maxLength) return { ok: false, reason: "invalid" };
+    if (mode === "draft") return { ok: true, value: typed };
+    if (!typed) return { ok: false, reason: "empty" };
+    const phone = normalizePhone(typed);
+    return phone ? { ok: true, value: phone } : { ok: false, reason: "invalid" };
   }
   if (spec.type === "integer") {
     if (isEmptyRaw(raw)) return { ok: false, reason: "empty" };
@@ -169,12 +254,15 @@ export function splitItems(
     const checked = checkItem(spec, raw, mode);
     if (!checked.ok) {
       if (checked.reason === "invalid") result.invalid.push(key);
+      // A cleared contact field empties the stored contact value.
+      else if ((spec.type === "select" || spec.type === "phone") && spec.contact && raw !== undefined)
+        result.contact[spec.contact] = "";
       // An empty choice/number/yes-no was cleared by the participant: overwrite with null.
-      else if (spec.type !== "text" && spec.type !== "email" && raw !== undefined)
+      else if (spec.type !== "text" && spec.type !== "email" && spec.type !== "phone" && raw !== undefined)
         result.responses[key] = null;
       continue;
     }
-    if ((spec.type === "text" || spec.type === "email") && spec.contact) {
+    if ("contact" in spec && spec.contact) {
       result.contact[spec.contact] = String(checked.value);
     } else {
       result.responses[key] = checked.value;
@@ -185,11 +273,18 @@ export function splitItems(
 
 /** Keys of required items that are missing or invalid (for Next). Optional items only count when filled wrongly. */
 export function missingItems(specs: readonly ItemSpec[], values: ItemValues): string[] {
+  const filled = (key: string) => {
+    const raw = values[key];
+    return !isEmptyRaw(raw) && String(raw).trim() !== "";
+  };
   return specs
     .filter((s) => {
       const checked = checkItem(s, values[s.key], "final");
       if (checked.ok) return false;
-      return isRequired(s) || checked.reason === "invalid";
+      if (checked.reason === "invalid") return true;
+      // Optional pair (e-wallet + phone): needed as soon as the other one is filled.
+      if ((s.type === "select" || s.type === "phone") && s.requiredWith) return filled(s.requiredWith);
+      return isRequired(s);
     })
     .map((s) => s.key);
 }
@@ -219,7 +314,9 @@ export function hasProblems(p: StepProblems): boolean {
 }
 
 function groupOf(spec: ItemSpec): ItemGroup | undefined {
-  return spec.type === "integer" || spec.type === "binary" ? spec.group : undefined;
+  return spec.type === "integer" || spec.type === "binary" || spec.type === "choice" || spec.type === "likert"
+    ? spec.group
+    : undefined;
 }
 
 /**

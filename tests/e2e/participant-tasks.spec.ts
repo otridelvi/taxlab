@@ -473,8 +473,8 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     await expect(page.getByRole("timer")).toBeVisible();
     await nextButton(page).click();
 
-    // P4-13: timer stopped, questionnaire placeholder next
-    await expect(page.getByText("mc_choice")).toBeVisible();
+    // P4-13: timer stopped, questionnaire next
+    await expect(heading(page, "Pengalaman selama penugasan")).toBeVisible();
     await expect(page.getByRole("timer")).toHaveCount(0);
     await expect(page.getByText(/tanpa batas waktu/)).toBeVisible();
     const p = await participant(code);

@@ -303,3 +303,26 @@ export const FILE_MAP = {
   label: "Berkas klien",
   states: { done: "Sudah dibaca", now: "Sedang dibaca", todo: "Belum diterima" },
 } as const;
+
+/** Kuesioner, cek manipulasi dan demografi (PLAN-06). */
+export const MC_INTRO =
+  "Jawablah pertanyaan-pertanyaan berikut berdasarkan pengalaman yang anda alami selama melaksanakan penugasan." as const;
+export const LIKERT_INTRO =
+  "Jawablah pertanyaan-pertanyaan berikut berdasarkan pengalaman yang anda alami selama melaksanakan penugasan pada rentang <strong>1 (sangat tidak setuju)</strong> sampai dengan <strong>5 (sangat setuju)</strong>." as const;
+export const QUEST_PARTS = {
+  mcq: "Bagian A · Pilihan ganda",
+  likert: "Bagian B · Skala 1–5",
+} as const;
+export const DEMO_TEXT = {
+  title: "Data demografi",
+  semester: { label: "Semester", placeholder: "mis. 5" },
+  gender: "Jenis kelamin",
+  age: { label: "Umur", unit: "tahun" },
+  education: "Tingkat pendidikan",
+  incentive: "Insentif e-wallet*",
+  ewallet: "Jenis e-wallet",
+  ewalletPlaceholder: "Pilih e-wallet",
+  phone: "No. HP",
+  phonePlaceholder: "812 3456 7890",
+  note: "*Untuk tujuan pengisian insentif e-wallet sebagai partisipan. Nomor disimpan terpisah dari jawaban penelitian anda.",
+} as const;

@@ -4,7 +4,9 @@ import { serviceClient } from "./fixtures";
 import {
   answerAllCases,
   answerConfidence,
+  answerDemographics,
   answerFirstOptions,
+  answerQuestionnaire,
   answerRecommendation,
   caseRow,
   consentAndLogin,
@@ -282,7 +284,7 @@ test.describe("PLAN-05 · flow B", () => {
     expect(after.timed_out).toBe(true);
     expect(after.timed_out_at_page).toBe("cases_r1");
     await nextButton(page).click();
-    await expect(page.getByText("questionnaire")).toBeVisible(); // placeholder until PLAN-06
+    await expect(heading(page, "Pengalaman selama penugasan")).toBeVisible(); // questionnaire
   });
 
   test("PB-17/PB-18 Sel 4 start to finish by clicking: 18 steps, data shaped like flow A, Survey Selesai ends the session", async ({
@@ -353,12 +355,14 @@ test.describe("PLAN-05 · flow B", () => {
     await answerConfidence(page, 80);
     await nextButton(page).click();
 
-    await expect(page.getByText("questionnaire")).toBeVisible();
+    await expect(heading(page, "Pengalaman selama penugasan")).toBeVisible(); // questionnaire
     await here();
     await expect(page.getByRole("timer")).toHaveCount(0); // timer stopped after confidence 2
+    await answerQuestionnaire(page, [1, 2, 2], [4, 4, 5, 5]);
     await nextButton(page).click();
-    await expect(page.getByText("demographics")).toBeVisible(); // placeholder until PLAN-06
+    await expect(heading(page, "Data demografi")).toBeVisible();
     await here();
+    await answerDemographics(page, { ewallet: "ovo", phone: "081234567890" });
     await nextButton(page).click();
     await expect(heading(page, /Taklimat/)).toBeVisible();
     await here();
@@ -399,6 +403,10 @@ test.describe("PLAN-05 · flow B", () => {
     expect(saved.confidence_r1).toBe(60);
     expect(saved.confidence_r2).toBe(80);
     expect(Object.keys(saved).filter((k) => k.startsWith("cov_q"))).toHaveLength(5);
+    expect([saved.mc_q1, saved.mc_q2, saved.mc_q3]).toEqual([1, 2, 2]);
+    expect([saved.mc_likert1, saved.mc_likert2, saved.mc_likert3, saved.mc_likert4]).toEqual([4, 4, 5, 5]);
+    expect([saved.semester, saved.gender, saved.age, saved.education]).toEqual([5, 1, 21, 2]);
+    await expect(page.getByText("Segera hadir")).toHaveCount(0);
 
     const docs = await eventsOf(code, ["doc_open"]);
     expect(docs.map((e) => e.target)).toEqual(["memo", "review"]);

@@ -14,9 +14,12 @@ import {
 import { P_MESSAGES } from "@/lib/participant-messages";
 import { CasesBoard, type CaseView } from "./CasesBoard";
 import { ConfidenceField } from "./ConfidenceField";
+import { DemographicFields } from "./DemographicFields";
 import { flushEvents, setCurrentPage, track } from "./events-client";
 import { Fields } from "./Fields";
+import { LikertGrid } from "./LikertGrid";
 import { MoneyFields } from "./MoneyFields";
+import { QuestionnaireFields, type QuestionnairePart } from "./QuestionnaireFields";
 import { closeAllReading } from "./reading";
 import { useReloadStep } from "./use-reload-step";
 import s from "./p.module.css";
@@ -31,6 +34,8 @@ type Props = {
   footNote?: string;
   fieldsTitle?: string;
   fieldsIntro?: string;
+  /** Flow B questionnaire: titles and intros of part A and part B. */
+  parts?: { mcq: QuestionnairePart; likert: QuestionnairePart };
   /** Kick + h1 of the items sheet, for steps whose items are the whole page (recommendation, confidence). */
   heading?: { kick: string; title: string };
   /** Case list of a `cases` step, and the cases already opened in this round (server's view). */
@@ -79,6 +84,7 @@ export function StepForm({
   footNote,
   fieldsTitle,
   fieldsIntro,
+  parts,
   heading,
   cases,
   opened = [],
@@ -239,14 +245,22 @@ export function StepForm({
               fieldsTitle && <h2 className={s.h2}>{fieldsTitle}</h2>
             )}
             {fieldsIntro && (
-              <p className={s.muted} style={{ margin: "0 0 20px" }}>
-                {fieldsIntro}
-              </p>
+              <p
+                className={s.muted}
+                style={{ margin: "0 0 20px" }}
+                dangerouslySetInnerHTML={{ __html: fieldsIntro }}
+              />
             )}
             {kind === "recommendation" ? (
               <MoneyFields {...fieldProps} />
             ) : kind === "confidence" ? (
               <ConfidenceField {...fieldProps} />
+            ) : kind === "likert" ? (
+              <LikertGrid {...fieldProps} />
+            ) : kind === "demographics" ? (
+              <DemographicFields {...fieldProps} />
+            ) : kind === "questionnaire" && parts ? (
+              <QuestionnaireFields {...fieldProps} parts={parts} />
             ) : (
               <Fields {...fieldProps} />
             )}

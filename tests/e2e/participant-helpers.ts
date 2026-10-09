@@ -138,6 +138,55 @@ export async function answerFirstOptions(page: Page) {
   for (let i = 0; i < n; i++) await groups.nth(i).getByRole("radio").first().check();
 }
 
+/** Manipulation check part A: option number (1–3) per question mc_q1…mc_q3. */
+export async function answerMc(page: Page, options: number[] = [1, 1, 1]) {
+  for (let i = 0; i < 3; i++)
+    await page
+      .locator(`input[name="mc_q${i + 1}"]`)
+      .nth(options[i] - 1)
+      .check();
+}
+
+/** Part B: scale value (1–5) per statement mc_likert1…mc_likert4. */
+export async function answerLikert(page: Page, values: number[] = [3, 3, 3, 3]) {
+  for (let i = 0; i < 4; i++)
+    await page
+      .locator(`input[name="mc_likert${i + 1}"]`)
+      .nth(values[i] - 1)
+      .check();
+}
+
+/** Flow B questionnaire page: both parts. */
+export async function answerQuestionnaire(page: Page, mc?: number[], likert?: number[]) {
+  await answerMc(page, mc);
+  await answerLikert(page, likert);
+}
+
+export type DemographicAnswers = {
+  semester?: string;
+  gender?: 1 | 2;
+  age?: string;
+  education?: 1 | 2 | 3 | 4;
+  ewallet?: string;
+  phone?: string;
+};
+
+/** Demographics page; the incentive fields are only touched when given. */
+export async function answerDemographics(page: Page, a: DemographicAnswers = {}) {
+  await page.getByLabel("Semester", { exact: true }).fill(a.semester ?? "5");
+  await page
+    .locator('input[name="gender"]')
+    .nth((a.gender ?? 1) - 1)
+    .check();
+  await page.getByLabel("Umur", { exact: true }).fill(a.age ?? "21");
+  await page
+    .locator('input[name="education"]')
+    .nth((a.education ?? 2) - 1)
+    .check();
+  if (a.ewallet) await page.getByLabel("Jenis e-wallet").selectOption(a.ewallet);
+  if (a.phone) await page.getByLabel("No. HP").fill(a.phone);
+}
+
 export const REC_LABELS = [
   "Biaya know how fee",
   "Biaya entertainment",

@@ -406,6 +406,8 @@ export type StepView = {
   footNote?: string;
   fieldsTitle?: string;
   fieldsIntro?: string;
+  /** Flow B questionnaire: titles and intros of part A and part B. */
+  parts?: { mcq: { title: string; intro: string }; likert: { title: string; intro: string } };
   /** Kick + h1 of the items sheet (steps that are only their items). */
   heading?: { kick: string; title: string };
   /** Flow B: the document of the step is closed (items hidden, Next off). */
@@ -418,7 +420,7 @@ export type StepContext = {
   docOpened: boolean;
 };
 
-/** Content for a step. Steps built in later plans render a placeholder (PLAN-03 D-8). */
+/** Content for a step. A step without a case here renders a fallback page. */
 export function stepView(
   step: Step,
   f: Factors,
@@ -759,14 +761,42 @@ export function stepView(
           </Sheet>
         ),
       };
+    case "questionnaire":
+      return {
+        heading: { kick: "Kuesioner · 1 dari 2", title: "Pengalaman selama penugasan" },
+        parts: {
+          mcq: { title: T.QUEST_PARTS.mcq, intro: T.MC_INTRO },
+          likert: { title: T.QUEST_PARTS.likert, intro: T.LIKERT_INTRO },
+        },
+        content: null,
+      };
+    case "mc_choice":
+      return {
+        heading: { kick: "Kuesioner · 1 dari 3", title: "Pengalaman selama penugasan" },
+        fieldsIntro: T.MC_INTRO,
+        content: null,
+      };
+    case "mc_likert":
+      return {
+        heading: { kick: "Kuesioner · 2 dari 3", title: "Pengalaman selama penugasan (lanjutan)" },
+        fieldsIntro: T.LIKERT_INTRO,
+        content: null,
+      };
+    case "demographics":
+      return {
+        heading: {
+          kick: ctx.flow === "B" ? "Kuesioner · 2 dari 2" : "Kuesioner · 3 dari 3",
+          title: T.DEMO_TEXT.title,
+        },
+        content: null,
+      };
     default:
       return {
         content: (
           <Sheet doc={false}>
-            <Head kick="Segera hadir" title="Halaman ini disiapkan pada tahap berikutnya" />
+            <Head kick="Segera hadir" title="Halaman ini belum tersedia" />
             <p className={s.muted}>
-              Pratinjau SIT: isi halaman <code>{step.id}</code> dibangun pada PLAN-06. Tekan Next untuk
-              melanjutkan alur.
+              Isi halaman <code>{step.id}</code> belum disiapkan. Tekan Next untuk melanjutkan alur.
             </p>
           </Sheet>
         ),

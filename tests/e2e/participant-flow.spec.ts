@@ -7,6 +7,9 @@ import {
   createCodeTracker,
   heading,
   loginApi,
+  answerDemographics,
+  answerLikert,
+  answerMc,
   nextUntil,
   participant,
 } from "./participant-helpers";
@@ -206,8 +209,16 @@ test.describe("PLAN-03 · participant flow", () => {
     expect(p.task_end_at).toBe(p.task_deadline);
 
     await clickNext(page, "Lanjut ke pertanyaan");
-    await expect(page.getByText("mc_choice")).toBeVisible(); // placeholder until PLAN-05
-    await nextUntil(page, /Taklimat/);
+    await expect(heading(page, "Pengalaman selama penugasan")).toBeVisible(); // mc_choice
+    await answerMc(page);
+    await clickNext(page);
+    await expect(heading(page, /\(lanjutan\)/)).toBeVisible(); // mc_likert
+    await answerLikert(page);
+    await clickNext(page);
+    await expect(heading(page, "Data demografi")).toBeVisible();
+    await answerDemographics(page);
+    await clickNext(page);
+    await expect(heading(page, /Taklimat/)).toBeVisible();
     await clickNext(page);
     await page.getByRole("button", { name: "Survey Selesai" }).click();
     await expect(heading(page, "Terima kasih")).toBeVisible();

@@ -51,9 +51,9 @@ export function FinishStep({ page = "finish", children }: { page?: string; child
         {done ? (
           <section className={`${s.sheet} ${s.ui} ${s.center}`} role="status">
             <div className={s.kick}>Tersimpan</div>
-            <h2 className={s.title} style={{ margin: "6px 0 8px" }}>
+            <h1 className={s.title} style={{ margin: "6px 0 8px" }}>
               Terima kasih
-            </h2>
+            </h1>
             <p style={{ margin: "0 auto" }}>
               Jawaban anda telah tersimpan dan sesi telah berakhir. Anda boleh menutup halaman ini.
             </p>

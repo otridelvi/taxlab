@@ -39,7 +39,7 @@ async function startAt(page: Page, cell: number, step: string): Promise<string> 
   return code;
 }
 
-const fileMap = (page: Page) => page.getByRole("navigation", { name: "Berkas klien" });
+const fileMap = (page: Page) => page.getByRole("navigation", { name: "Map berkas penugasan" });
 const openButton = (page: Page, name: string) => page.getByRole("button", { name, exact: true });
 
 test.describe("PLAN-05 · flow B", () => {
@@ -217,7 +217,9 @@ test.describe("PLAN-05 · flow B", () => {
     await openButton(page, "Buka reviu").click();
     await nextButton(page).click(); // → cases_r2 (no cases_intro_r2)
     await expect(heading(page, "Daftar kasus acuan")).toBeVisible();
-    await expect(page.getByRole("heading", { level: 2, name: "Mempelajari kasus serupa" })).toBeVisible();
+    await expect(page.getByText("Instruksi", { exact: true })).toBeVisible(); // banner, not a page
+    await expect(page.getByRole("heading", { name: "Mempelajari kasus serupa" })).toHaveCount(0);
+    await expect(page.getByText(/Tersedia 14 kasus/)).toBeVisible();
     await expect(page.locator("li[data-case]")).toHaveCount(14);
     await expect(page.getByText(/Dibuka\s+0\/14/)).toBeVisible();
     await expect(caseRow(page, 1).getByRole("combobox")).toHaveValue("");

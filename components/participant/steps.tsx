@@ -296,16 +296,12 @@ function Envelope({
   );
 }
 
-/** The case instructions (flow A: page; flow B round 2: banner above the list). */
-function CasesIntroBody({ banner }: { banner?: boolean }) {
+/** The case instructions page (flow A, and flow B round 1 as its own page). */
+function CasesIntroBody() {
   return (
     <>
       <div className={s.kick}>Kasus acuan</div>
-      {banner ? (
-        <h2 className={s.title}>Mempelajari kasus serupa</h2>
-      ) : (
-        <h1 className={s.title}>Mempelajari kasus serupa</h1>
-      )}
+      <h1 className={s.title}>Mempelajari kasus serupa</h1>
       <Paras list={T.CASES_INTRO} />
       <ul className={s.points}>
         {T.CASES_LIST.map((t) => (
@@ -321,8 +317,7 @@ function CasesIntroBody({ banner }: { banner?: boolean }) {
         {T.ATTN}
       </div>
       <p className={s.muted} style={{ fontFamily: "var(--font-sans)" }}>
-        {banner ? "" : "Kasus-kasus tersebut disajikan mulai dari halaman berikutnya. "}
-        {T.CASES_FOOT}
+        Kasus-kasus tersebut disajikan mulai dari halaman berikutnya. {T.CASES_FOOT}
       </p>
     </>
   );
@@ -669,9 +664,18 @@ export function stepView(
         footNote: T.CASES_TEXT.foot,
         content:
           ctx.flow === "B" && step.id === "cases_r2" ? (
-            <Sheet>
-              <CasesIntroBody banner />
-            </Sheet>
+            <section className={`${s.instrBanner} ${s.ui}`}>
+              <strong className={s.lbl}>Instruksi</strong>
+              <Paras list={T.CASES_INTRO} />
+              <ul>
+                {T.CASES_LIST.map((x) => (
+                  <Html key={x} as="li" html={x} />
+                ))}
+              </ul>
+              <Html html={T.RANK_ORDER} />
+              <p>{T.ATTN}</p>
+              <p>{T.CASES_FOOT}</p>
+            </section>
           ) : null,
       };
     case "covariates":

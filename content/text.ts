@@ -300,7 +300,8 @@ export const INSTRUCTION_TITLES = [
 
 /** Flow B file map (B-10). */
 export const FILE_MAP = {
-  label: "Berkas klien",
+  label: "Map berkas",
+  ariaLabel: "Map berkas penugasan",
   states: { done: "Sudah dibaca", now: "Sedang dibaca", todo: "Belum diterima" },
 } as const;
 

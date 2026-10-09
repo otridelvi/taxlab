@@ -118,6 +118,7 @@ export function CasesBoard({ cases, items, values, missing, opened, round, onCha
             const badSave = missing.includes(saveKey(c.no));
             const detailId = `${uid}-detail-${c.no}`;
             const rankId = `${uid}-rank-${c.no}`;
+            const saveLabelId = `${uid}-savelab-${c.no}`;
             return (
               <li
                 key={c.no}
@@ -144,7 +145,7 @@ export function CasesBoard({ cases, items, values, missing, opened, round, onCha
                       <span className={s.sr}> kasus {c.no}</span>
                     </button>
                     <div className={s.kcTwo}>
-                      <div>
+                      <div className={s.kcCell}>
                         <label className={s.lab} htmlFor={rankId}>
                           Peringkat
                         </label>
@@ -168,26 +169,34 @@ export function CasesBoard({ cases, items, values, missing, opened, round, onCha
                           })}
                         </select>
                       </div>
-                      <fieldset className={s.yn}>
-                        <legend className={s.lab}>Simpan sebagai acuan?</legend>
-                        {(
-                          [
-                            [1, "Ya"],
-                            [0, "Tidak"],
-                          ] as const
-                        ).map(([v, label]) => (
-                          <label key={v} className={`${save === v ? s.ynOn : ""} ${badSave ? s.badYn : ""}`}>
-                            <input
-                              type="radio"
-                              name={`${uid}-save-${c.no}`}
-                              checked={save === v}
-                              onChange={() => setSave(c.no, v)}
-                              aria-label={`${label}, simpan ${c.name} sebagai acuan`}
-                            />
-                            {label}
-                          </label>
-                        ))}
-                      </fieldset>
+                      <div className={s.kcCell} role="radiogroup" aria-labelledby={saveLabelId}>
+                        <span className={s.lab} id={saveLabelId}>
+                          <span className={s.labLong}>Simpan sebagai acuan?</span>
+                          <span className={s.labShort} aria-hidden="true">
+                            Simpan?
+                          </span>
+                        </span>
+                        {/* Segmented toggle: two radios styled as one switch, so "not answered" stays possible. */}
+                        <div className={`${s.toggle} ${badSave ? s.badToggle : ""}`}>
+                          {(
+                            [
+                              [1, "Ya"],
+                              [0, "Tidak"],
+                            ] as const
+                          ).map(([v, label]) => (
+                            <label key={v} className={save === v ? s.toggleOn : undefined}>
+                              <input
+                                type="radio"
+                                name={`${uid}-save-${c.no}`}
+                                checked={save === v}
+                                onChange={() => setSave(c.no, v)}
+                                aria-label={`${label}, simpan ${c.name} sebagai acuan`}
+                              />
+                              <span aria-hidden="true">{label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

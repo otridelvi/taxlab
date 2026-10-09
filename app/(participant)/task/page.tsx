@@ -147,19 +147,13 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
       section={SECTION_LABELS[step.section]}
       code={participant.accessCode}
       timer={timer}
-      wide={isCases || Boolean(step.map)}
+      wide={isCases}
       headerAction={menu.length > 0 ? <RefButton /> : undefined}
     >
       {resumeNotice}
       {menu.length > 0 && <RefBar />}
-      {step.map ? (
-        <div className={s.mapLayout}>
-          <FileMap current={step.map} />
-          <div className={s.mapMain}>{form}</div>
-        </div>
-      ) : (
-        form
-      )}
+      {step.map && <FileMap current={step.map} />}
+      {form}
     </FirmShell>
   );
 

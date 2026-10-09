@@ -44,23 +44,44 @@ export function FinishStep({ page = "finish", children }: { page?: string; child
     setBusy(false);
   }
 
-  if (children && !done) {
+  if (children) {
     return (
       <>
         {children}
-        <div className={s.foot}>
-          <span />
-          <div className={s.footRight}>
+        {done ? (
+          <section className={`${s.sheet} ${s.ui} ${s.center}`} role="status">
+            <div className={s.kick}>Tersimpan</div>
+            <h2 className={s.title} style={{ margin: "6px 0 8px" }}>
+              Terima kasih
+            </h2>
+            <p style={{ margin: "0 auto" }}>
+              Jawaban anda telah tersimpan dan sesi telah berakhir. Anda boleh menutup halaman ini.
+            </p>
+          </section>
+        ) : (
+          <section className={`${s.sheet} ${s.ui} ${s.center}`}>
+            <h2 className={s.h2} style={{ marginTop: 0 }}>
+              Selamat, anda telah menyelesaikan pekerjaan anda.
+            </h2>
+            <p className={s.muted} style={{ margin: "0 auto 20px" }}>
+              Silakan klik tombol “Survey Selesai” untuk menyimpan dan mengakhiri sesi.
+            </p>
+            <button
+              type="button"
+              className={s.btn}
+              style={{ minWidth: 240 }}
+              onClick={() => void finish()}
+              disabled={busy}
+            >
+              Survey Selesai
+            </button>
             {message && (
-              <p className={s.err} role="alert">
+              <p className={s.err} role="alert" style={{ marginTop: 12 }}>
                 {message}
               </p>
             )}
-            <button type="button" className={s.btn} onClick={() => void finish()} disabled={busy}>
-              Survey Selesai
-            </button>
-          </div>
-        </div>
+          </section>
+        )}
       </>
     );
   }

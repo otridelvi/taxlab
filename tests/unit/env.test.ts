@@ -30,3 +30,9 @@ test("lists every missing or invalid variable", () => {
       err.message.includes("SUPABASE_SERVICE_ROLE_KEY"),
   );
 });
+
+test("HEALTHCHECK_TOKEN is optional but must be 16+ characters when set", () => {
+  assert.equal(parseServerEnv(valid).HEALTHCHECK_TOKEN, undefined);
+  assert.equal(parseServerEnv({ ...valid, HEALTHCHECK_TOKEN: "t".repeat(16) }).HEALTHCHECK_TOKEN, "t".repeat(16));
+  assert.throws(() => parseServerEnv({ ...valid, HEALTHCHECK_TOKEN: "short" }), /HEALTHCHECK_TOKEN/);
+});

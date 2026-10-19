@@ -26,7 +26,7 @@ import {
 
 /**
  * PLAN-04 · case list, menu Berkas, knowledge questions, recommendation, confidence,
- * Reviu Atasan, over two rounds (scenarios P4-1 … P4-14). Participants are logged in
+ * Reviu Supervisor, over two rounds (scenarios P4-1 … P4-14). Participants are logged in
  * through the UI and then placed on the step under test with jumpTo(); P4-13 walks the
  * whole task by clicking.
  */
@@ -301,17 +301,17 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     expect((await savedAnswers(code)).confidence_r1).toBe(85);
 
     await nextButton(page).click();
-    await expect(heading(page, "Reviu Atasan/Supervisor")).toBeVisible();
+    await expect(heading(page, "Reviu Supervisor")).toBeVisible();
     expect((await participant(code)).current_page).toBe("review");
   });
 
   test("P4-9 menu Berkas in round 1: three files in the cell's variant, no Reviu, events logged", async ({
     page,
   }) => {
-    const code = await startAt(page, 3, "cases_r1"); // Implisit + Kuat
+    const code = await startAt(page, 3, "cases_r1"); // Implisit + reviu tidak spesifik
     const bar = page.getByRole("navigation", { name: "Berkas penugasan" });
     await expect(bar.getByRole("button")).toHaveText(["Fakta Klien", "Berita Acara", "Memo Penugasan"]);
-    await expect(bar.getByRole("button", { name: "Reviu Atasan" })).toHaveCount(0);
+    await expect(bar.getByRole("button", { name: "Reviu Supervisor" })).toHaveCount(0);
 
     await bar.getByRole("button", { name: "Berita Acara" }).click();
     await expect(dialog(page)).toBeVisible();
@@ -322,9 +322,7 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     await page.keyboard.press("Escape");
     await expect(dialog(page)).toHaveCount(0);
     await bar.getByRole("button", { name: "Memo Penugasan" }).click();
-    await expect(
-      dialog(page).getByText("Anda harus mencantumkan nama anda dan alamat pos elektronik (email anda)"),
-    ).toBeVisible(); // Kuat
+    await expect(dialog(page).getByText("17 Juli 2026")).toBeVisible();
     await dialog(page).getByRole("button", { name: "Tutup" }).click();
     await bar.getByRole("button", { name: "Fakta Klien" }).click();
     await expect(dialog(page).getByText("PT Cahaya Gama").first()).toBeVisible();
@@ -348,7 +346,7 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     expect(refs.filter((e) => e.type === "ref_close").every((e) => (e.duration_ms ?? 0) > 0)).toBe(true);
   });
 
-  test("P4-9 variant: Eksplisit + Lemah sees the other texts; cell never reaches the browser", async ({
+  test("P4-9 variant: Eksplisit + reviu spesifik sees the other texts; cell never reaches the browser", async ({
     page,
   }) => {
     await startAt(page, 2, "cases_r1");
@@ -358,14 +356,10 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     await expect(dialog(page).getByText(/sangat diperhatikan dan dievaluasi/)).toHaveCount(0);
     await dialog(page).getByRole("button", { name: "Tutup" }).click();
     await bar.getByRole("button", { name: "Memo Penugasan" }).click();
-    await expect(
-      dialog(page).getByText("Anda tidak harus mencantumkan nama dan alamat email anda"),
-    ).toBeVisible();
+    await expect(dialog(page).getByText("17 Juli 2026")).toBeVisible();
     await dialog(page).getByRole("button", { name: "Tutup" }).click();
     const html = await page.content();
     expect(html).not.toMatch(/"cell"|Sel [1-4]|Putaran|implisit|eksplisit/i);
-    // the strong variant is not in the page at all
-    expect(html).not.toContain("alamat pos elektronik");
     // reading time is not shown to the participant
     await expect(page.locator("main")).not.toContainText(/detik|menit dibaca|durasi/i);
   });
@@ -377,7 +371,7 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     const [code] = await codes.makeCodes([1]);
     await consentAndLogin(page, code);
 
-    // intro pages → Berita Acara (Implisit: two questions) → Memo (Lemah) → cases
+    // intro pages → Berita Acara (Implisit: two questions) → Memo → cases
     await nextButton(page).click(); // welcome → role (timer starts)
     for (let i = 0; i < 3; i++) await nextButton(page).click(); // role, rules, case_info
     for (let i = 0; i < 4; i++) await nextButton(page).click(); // facts 1–4
@@ -410,16 +404,16 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     await nextButton(page).click();
 
     // ---- review (no round), then round 2
-    await expect(heading(page, "Reviu Atasan/Supervisor")).toBeVisible();
+    await expect(heading(page, "Reviu Supervisor")).toBeVisible();
     expect((await participant(code)).current_round).toBeNull();
     await nextButton(page).click();
-    await expect(heading(page, "Mempelajari kasus serupa")).toBeVisible();
+    await expect(heading(page, "Mempelajari kembali kasus acuan")).toBeVisible();
     // the menu now holds four files
     await expect(page.getByRole("navigation", { name: "Berkas penugasan" }).getByRole("button")).toHaveText([
       "Fakta Klien",
       "Berita Acara",
       "Memo Penugasan",
-      "Reviu Atasan",
+      "Reviu Supervisor",
     ]);
     await nextButton(page).click();
 
@@ -433,9 +427,9 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     await expect(summary(page)).toContainText("Dibuka 0/14");
     await expect(page.locator("main").getByText(/Peringkat\s+0\/14/)).toBeVisible();
     const bar = page.getByRole("navigation", { name: "Berkas penugasan" });
-    await bar.getByRole("button", { name: "Reviu Atasan" }).click();
+    await bar.getByRole("button", { name: "Reviu Supervisor" }).click();
     await expect(
-      dialog(page).getByRole("heading", { level: 2, name: "Reviu Atasan/Supervisor" }),
+      dialog(page).getByRole("heading", { level: 2, name: "Reviu Supervisor" }),
     ).toBeVisible();
     await dialog(page).getByRole("button", { name: "Tutup" }).click();
 
@@ -557,9 +551,9 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     const panel = (await dialog(page).boundingBox())!;
     expect(Math.round(panel.width)).toBe(390);
     await expect(dialog(page).getByRole("button", { name: "Fakta Klien" })).toBeVisible();
-    await expect(dialog(page).getByRole("button", { name: "Reviu Atasan" })).toHaveCount(0);
+    await expect(dialog(page).getByRole("button", { name: "Reviu Supervisor" })).toHaveCount(0);
     await dialog(page).getByRole("button", { name: "Memo Penugasan" }).tap();
-    await expect(dialog(page).getByText("Anda harus mencantumkan nama anda")).toBeVisible();
+    await expect(dialog(page).getByText("17 Juli 2026")).toBeVisible();
     await dialog(page).getByRole("button", { name: "Daftar berkas" }).tap();
     await expect(dialog(page).getByText("Pilih berkas untuk dibaca")).toBeVisible();
     await dialog(page).getByRole("button", { name: "Tutup" }).tap();

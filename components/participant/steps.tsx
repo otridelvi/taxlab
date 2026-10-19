@@ -119,7 +119,7 @@ function DocTitle({ level = 1, children }: { level?: 1 | 2; children: ReactNode 
   return <Tag className={s.title}>{children}</Tag>;
 }
 
-export function MemoDoc({ strong, level = 1 }: { strong: boolean; level?: 1 | 2 }) {
+export function MemoDoc({ level = 1 }: { level?: 1 | 2 }) {
   return (
     <>
       <Kop refNo="MEMO/[NOMOR]" />
@@ -135,7 +135,7 @@ export function MemoDoc({ strong, level = 1 }: { strong: boolean; level?: 1 | 2 
         </div>
         <div>
           <dt>Tanggal</dt>
-          <dd>[TANGGAL]</dd>
+          <dd>{T.MEMO_DATE}</dd>
         </div>
         <div>
           <dt>Subjek</dt>
@@ -143,11 +143,6 @@ export function MemoDoc({ strong, level = 1 }: { strong: boolean; level?: 1 | 2 
         </div>
       </dl>
       <Paras list={T.MEMO_BODY} />
-      <ol className={s.points}>
-        {(strong ? T.MEMO_STRONG : T.MEMO_WEAK).map((p) => (
-          <li key={p}>{p}</li>
-        ))}
-      </ol>
       <div className={s.note} style={{ margin: "8px 0 20px" }}>
         <strong className={s.lbl}>Diingatkan kembali</strong>
         {T.MEMO_REMIND}
@@ -157,13 +152,19 @@ export function MemoDoc({ strong, level = 1 }: { strong: boolean; level?: 1 | 2 
   );
 }
 
-/** Placeholder Reviu Atasan (PERTANYAAN A6/Q8): same text for every cell until the researcher decides. */
-function reviewParas(f: Factors): readonly string[] {
-  void f; // add per-factor variants here when the final text exists
-  return T.REVIEW_BODY;
+/**
+ * Reviu Supervisor per cell (PLAN-09). Sel 1 (implisit + reviu spesifik) has its final text;
+ * Sel 2-4 stay on the lorem ipsum placeholder until the researcher sends them.
+ */
+function reviewContent(f: Factors): { paras: readonly string[]; points: readonly string[] } {
+  if (f.pref === "impl" && f.review === "yes") {
+    return { paras: T.REVIEW_SEL1_BODY, points: T.REVIEW_SEL1_POINTS };
+  }
+  return { paras: T.REVIEW_BODY, points: [] };
 }
 
 export function ReviewDoc({ f, level = 1 }: { f: Factors; level?: 1 | 2 }) {
+  const { paras, points } = reviewContent(f);
   return (
     <>
       <Kop refNo="REVIU/[NOMOR]" />
@@ -175,19 +176,26 @@ export function ReviewDoc({ f, level = 1 }: { f: Factors; level?: 1 | 2 }) {
         </div>
         <div>
           <dt>Dari</dt>
-          <dd>Manajer Pajak</dd>
+          <dd>{T.REVIEW_FROM}</dd>
         </div>
         <div>
           <dt>Tanggal</dt>
-          <dd>[TANGGAL]</dd>
+          <dd>{T.REVIEW_DATE}</dd>
         </div>
         <div>
           <dt>Subjek</dt>
           <dd>{T.REVIEW_SUBJECT}</dd>
         </div>
       </dl>
-      <Paras list={reviewParas(f)} />
-      <p style={{ fontStyle: "italic" }}>Manajer Pajak</p>
+      <Paras list={paras} />
+      {points.length > 0 && (
+        <ol className={s.points}>
+          {points.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ol>
+      )}
+      <p style={{ fontStyle: "italic" }}>{T.REVIEW_FROM}</p>
     </>
   );
 }
@@ -297,7 +305,27 @@ function Envelope({
 }
 
 /** The case instructions page (flow A, and flow B round 1 as its own page). */
-function CasesIntroBody() {
+function CasesIntroBody({ round2 = false }: { round2?: boolean }) {
+  if (round2) {
+    return (
+      <>
+        <div className={s.kick}>Kasus acuan</div>
+        <h1 className={s.title}>Mempelajari kembali kasus acuan</h1>
+        <Paras list={T.CASES2_INTRO} />
+        <div className={s.callout} style={{ margin: "8px 0 20px" }}>
+          <strong className={s.lbl}>Diingatkan kembali</strong>
+          {T.CASES2_REMIND}
+        </div>
+        <div className={s.note} style={{ marginBottom: 20 }}>
+          <strong className={s.lbl}>Perhatian</strong>
+          {T.ATTN}
+        </div>
+        <p className={s.muted} style={{ fontFamily: "var(--font-sans)" }}>
+          {T.CASES2_FOOT}
+        </p>
+      </>
+    );
+  }
   return (
     <>
       <div className={s.kick}>Kasus acuan</div>
@@ -390,7 +418,7 @@ export function refDocs(
           <MinutesBody f={f} />
         </>
       ),
-    memo: () => <MemoDoc strong={f.acc === "strong"} level={2} />,
+    memo: () => <MemoDoc level={2} />,
     review: () => <ReviewDoc f={f} level={2} />,
   };
   return Object.fromEntries(keys.map((k) => [k, all[k]()]));
@@ -619,11 +647,9 @@ export function stepView(
         };
       }
       return {
-        fieldsTitle: "Identitas staf",
-        fieldsIntro: "Sesuai memo, cantumkan nama dan alamat email anda sebelum melanjutkan.",
         content: (
           <Sheet>
-            <MemoDoc strong={f.acc === "strong"} />
+            <MemoDoc />
           </Sheet>
         ),
       };
@@ -632,7 +658,7 @@ export function stepView(
       return {
         content: (
           <Sheet>
-            <CasesIntroBody />
+            <CasesIntroBody round2={step.id === "cases_intro_r2"} />
           </Sheet>
         ),
       };
@@ -666,15 +692,10 @@ export function stepView(
           ctx.flow === "B" && step.id === "cases_r2" ? (
             <section className={`${s.instrBanner} ${s.ui}`}>
               <strong className={s.lbl}>Instruksi</strong>
-              <Paras list={T.CASES_INTRO} />
-              <ul>
-                {T.CASES_LIST.map((x) => (
-                  <Html key={x} as="li" html={x} />
-                ))}
-              </ul>
-              <Html html={T.RANK_ORDER} />
+              <Paras list={T.CASES2_INTRO} />
+              <p>{T.CASES2_REMIND}</p>
               <p>{T.ATTN}</p>
-              <p>{T.CASES_FOOT}</p>
+              <p>{T.CASES2_FOOT}</p>
             </section>
           ) : null,
       };

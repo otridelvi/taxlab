@@ -17,9 +17,9 @@ export const MC_QUESTIONS = [
   {
     key: "mc_q2",
     legend:
-      "Dari memo penugasan yang diterima, penyelia/supervisor anda menyatakan bahwa (pilih salah satu):",
+      "Dari Reviu atasan yang anda terima, penyelia/supervisor anda menyatakan bahwa (pilih salah satu):",
     options: [
-      "Anda tidak harus mencantumkan identitas dan hasil pekerjaan akan dirapatkan bersama anggota tim lainnya",
+      "Anda Pastikan Apakah strategi dan dasar hukum yang digunakan sudah aman dan sesuai yurisprudensi",
       "Anda harus mencantumkan identitas, mendapatkan balikan secara formal dan mendapatkan komentar dari atasan terhadap pekerjaan yang anda lakukan",
       "Anda tidak perlu mencantumkan identitas dan akan mendapatkan komentar dari atasan terhadap pekerjaan yang anda lakukan",
     ],
@@ -27,20 +27,20 @@ export const MC_QUESTIONS = [
   {
     key: "mc_q3",
     legend:
-      "Dari memo penugasan yang diterima, penyelia/supervisor anda meminta anda untuk (pilih salah satu):",
+      "Dari Reviu atasan yang diterima, penyelia/supervisor anda meminta anda untuk (pilih salah satu):",
     options: [
-      "Mempelajari peluang pengembangan usaha klien dari perspektif perpajakan",
-      "Mempelajari, memeringkat dan menyimpan kasus yang ingin anda acu dalam pembuatan rekomendasi",
-      "Mempelajari kasus pajak klien dan menentukan tingkat keyakinan anda atas rekomendasi yang diberikan",
+      "Mempelajari pastikan Apakah proses, metode, dan rujukan hukumnya sudah sesuai dengan aturan main yang benar",
+      "[Placeholder opsi 2 · menunggu peneliti]",
+      "[Placeholder opsi 3 · menunggu peneliti]",
     ],
   },
 ] as const;
 
-/** Part B: four statements on a 1–5 agreement scale (1–2 client preference, 3–4 accountability). */
+/** Part B: four statements on a 1–5 agreement scale (1–2 client preference, 3–4 supervisor review). */
 export const LIKERT_STATEMENTS = [
   "Klien anda menekankan bahwa perlakuan pajak untuk akun-akun yang mereka usulkan agar sesuai dengan usulan pada draft yang mereka sampaikan",
   "Klien anda menyatakan bahwa kontrak penugasan jangka panjang sangat tergantung kepada rekomendasi yang anda berikan",
-  "Atasan anda menyatakan bahwa identitas anda harus lengkap dan pekerjaan anda akan dievaluasi",
+  "Atasan anda menyatakan bahwa usulan anda dan feedback akan disampaikan melalui email",
   "Diskusi lebih lanjut dengan anggota tim lain dilakukan setelah anda mempelajari balikan (feedback) dari atasan anda",
 ] as const;
 
@@ -54,7 +54,7 @@ export const LIKERT_LABELS = [
 
 /** Demographics: stored value = 1-based index of the option. */
 export const GENDER = ["L", "P"] as const;
-export const EDUCATION = ["D.III", "S1", "S2", "S3"] as const;
+export const UNIVERSITY = ["UNAND", "UGM"] as const;
 
 /** E-wallets for the incentive claim (PERTANYAAN D4). `value` is what `contacts.ewallet` stores. */
 export const EWALLETS = [

@@ -126,7 +126,7 @@ test.describe("PLAN-06 questionnaire and demographics", () => {
     await expect(age).toHaveValue("21");
     await expect(semester).toHaveAttribute("inputmode", "numeric");
     const bad = await page.request.post("/api/p/advance", {
-      data: { from: "demographics", items: { semester: 25, gender: 1, age: 21, education: 2 } },
+      data: { from: "demographics", items: { semester: 25, gender: 1, age: 21, university: 2 } },
     });
     expect(bad.status()).toBe(422);
     expect((await bad.json()).error.keys).toContain("semester");
@@ -166,7 +166,7 @@ test.describe("PLAN-06 questionnaire and demographics", () => {
       semester: "7",
       gender: 2,
       age: "22",
-      education: 3,
+      university: 1,
       ewallet: "dana",
       phone: "0812 3456 7890",
     });
@@ -176,7 +176,7 @@ test.describe("PLAN-06 questionnaire and demographics", () => {
     expect(row.ewallet).toBe("dana");
     expect(row.phone).toBe("+6281234567890");
     const saved = await savedAnswers(code);
-    expect([saved.semester, saved.gender, saved.age, saved.education]).toEqual([7, 2, 22, 3]);
+    expect([saved.semester, saved.gender, saved.age, saved.university]).toEqual([7, 2, 22, 1]);
     expect(Object.keys(saved).filter((k) => /contact|ewallet|phone/.test(k))).toEqual([]);
   });
 

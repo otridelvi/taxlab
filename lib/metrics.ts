@@ -313,7 +313,7 @@ export function computeMetrics(input: MetricInput): Metrics {
   row.code = p.code;
   row.cell = p.cell;
   row.pref = f.pref;
-  row.acc = f.acc;
+  row.review = f.review;
   row.batch = p.batch;
   row.status = p.status;
   row.content_version = p.content_version;
@@ -419,13 +419,13 @@ export function computeMetrics(input: MetricInput): Metrics {
   const q1 = resp("mc_q1");
   const q2 = resp("mc_q2");
   row.mc_pass_pref = q1 === null ? null : q1 === key.mc_q1 ? 1 : 0;
-  row.mc_pass_acc = q2 === null ? null : q2 === key.mc_q2 ? 1 : 0;
+  row.mc_pass_review = q2 === null || key.mc_q2 === null ? null : q2 === key.mc_q2 ? 1 : 0;
 
   // Demographics
   row.semester = resp("semester");
   row.gender = resp("gender");
   row.age = resp("age");
-  row.education = resp("education");
+  row.university = resp("university");
 
   return { row, detail: { cases, refs, sectionsMs } };
 }

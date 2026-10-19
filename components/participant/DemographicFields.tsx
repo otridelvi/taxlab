@@ -11,8 +11,8 @@ function nationalPart(value: unknown): string {
 }
 
 /**
- * Demographics (semester, gender, age, education) and the optional incentive claim
- * (e-wallet + phone), PLAN-06. Numbers use the numeric keyboard; gender and education are
+ * Demographics (semester, gender, age, university) and the optional incentive claim
+ * (e-wallet + phone), PLAN-06. Numbers use the numeric keyboard; gender and university are
  * pills; the incentive fields sit together under one legend with the privacy note.
  */
 export function DemographicFields({ items, values, missing, onChange }: FieldsProps) {

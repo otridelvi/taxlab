@@ -142,18 +142,18 @@ test("PA-5 flow B: memo read and gap; flow A leaves them empty and uses review_d
   assert.equal(a.review_dur_s, 65);
 });
 
-test("PA-6 mc_pass follows the cell; cov_score is empty while the key is empty", () => {
-  // Cell 4 = expl / strong → key mc_q1 = 1, mc_q2 = 2.
+test("PA-6 mc_pass_pref follows the cell; mc_pass_review and cov_score are empty while their keys are empty", () => {
+  // Cell 4 = expl / review not specific → key mc_q1 = 1; the mc_q2 key is still empty.
   const pass = run([], { mc_q1: 1, mc_q2: 2 }).row;
   assert.equal(pass.mc_pass_pref, 1);
-  assert.equal(pass.mc_pass_acc, 1);
+  assert.equal(pass.mc_pass_review, null);
   const fail = run([], { mc_q1: 2, mc_q2: 1 }).row;
   assert.equal(fail.mc_pass_pref, 0);
-  assert.equal(fail.mc_pass_acc, 0);
-  // Cell 1 = impl / weak → mc_q1 = 2, mc_q2 = 1.
+  assert.equal(fail.mc_pass_review, null);
+  // Cell 1 = impl / review specific → mc_q1 = 2.
   const c1 = run([], { mc_q1: 2, mc_q2: 1 }, { cell: 1 }).row;
   assert.equal(c1.mc_pass_pref, 1);
-  assert.equal(c1.mc_pass_acc, 1);
+  assert.equal(c1.review, "yes");
   assert.equal(run([]).row.mc_pass_pref, null);
   assert.equal(run([], { cov_q1: 1 }).row.cov_score, null);
 });

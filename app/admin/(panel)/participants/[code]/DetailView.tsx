@@ -3,7 +3,7 @@ import shell from "@/components/admin/admin.module.css";
 import { StatusLabel } from "@/components/admin/StatusLabel";
 import ui from "@/components/admin/ui.module.css";
 import cases from "@/content/cases.json";
-import { EDUCATION, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, MC_QUESTIONS } from "@/content/questions";
+import { UNIVERSITY, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, MC_QUESTIONS } from "@/content/questions";
 import { COSTS_DRAFT, COV, MINUTES_QUESTIONS, REC_LABELS } from "@/content/text";
 import { COV_KEY } from "@/lib/answer-keys";
 import { CELL_LABELS } from "@/lib/dashboard";
@@ -62,7 +62,7 @@ export function DetailView(props: Props) {
   const draft = COSTS_DRAFT.map(([, v]) => Number(v.replace(/\D/g, "")));
   const draftTotal = draft.reduce((a, b) => a + b, 0);
 
-  const mcPass = [row.mc_pass_pref, row.mc_pass_acc].map(num);
+  const mcPass = [row.mc_pass_pref, row.mc_pass_review].map(num);
   const mcText = mcPass.some((v) => v === null) ? EMPTY : `${mcPass.reduce<number>((a, b) => a + (b ?? 0), 0)}/2`;
 
   const recRows = [
@@ -190,7 +190,7 @@ export function DetailView(props: Props) {
           <h3>Cek manipulasi</h3>
           <div className={styles.statValue}>{mcText}</div>
           <div className={styles.statSub}>
-            Preferensi {cell(row.mc_pass_pref)} · akuntabilitas {cell(row.mc_pass_acc)}
+            Preferensi {cell(row.mc_pass_pref)} · reviu {cell(row.mc_pass_review)}
           </div>
         </article>
       </div>
@@ -368,7 +368,7 @@ export function DetailView(props: Props) {
             <span className={styles.q}>Demografi</span>
             <span>
               Semester {cell(row.semester)} · {choice(row.gender, GENDER).replace(/^\d · /, "") || EMPTY} · umur {cell(row.age)} ·{" "}
-              {choice(row.education, EDUCATION).replace(/^\d · /, "")}
+              {choice(row.university, UNIVERSITY).replace(/^\d · /, "")}
             </span>
           </li>
         </ul>

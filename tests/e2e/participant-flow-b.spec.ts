@@ -131,7 +131,7 @@ test.describe("PLAN-05 · flow B", () => {
     expect(opened).toHaveLength(1);
     expect(opened[0].target).toBe("memo");
     expect(opened[0].page_id).toBe("memo");
-    // Sel 1 = Lemah: no identity fields
+    // no identity fields in any cell
     await expect(page.getByLabel("Nama lengkap")).toHaveCount(0);
 
     // PB-8: refresh keeps it open and does not log a second doc_open
@@ -144,28 +144,15 @@ test.describe("PLAN-05 · flow B", () => {
     expect((await participant(code)).current_round).toBe(1);
   });
 
-  test("PB-7 Kuat cell: name and email appear only after Buka memo and are required", async ({ page }) => {
+  test("PB-7 Sel 3: no name/email fields; memo opens and Next moves on", async ({ page }) => {
     const code = await startAt(page, 3, "memo");
     await expect(page.getByLabel("Nama lengkap")).toHaveCount(0);
     await openButton(page, "Buka memo").click();
-    await expect(page.getByLabel("Nama lengkap")).toBeVisible();
-    await nextButton(page).click();
-    await expect(
-      page
-        .getByRole("alert")
-        .filter({ hasText: /lengkap|isi/i })
-        .first(),
-    ).toBeVisible();
-    await page.getByLabel("Nama lengkap").fill("Staf Uji");
-    await page.getByLabel("Alamat email").fill("staf.uji@example.com");
+    await expect(page.getByLabel("Nama lengkap")).toHaveCount(0);
+    await expect(page.getByLabel("Alamat email")).toHaveCount(0);
     await nextButton(page).click();
     await expect(heading(page, "Mempelajari kasus serupa")).toBeVisible();
-    const { data } = await serviceClient()
-      .from("contacts")
-      .select("name, email")
-      .eq("participant_id", (await participant(code)).id)
-      .single();
-    expect(data).toEqual({ name: "Staf Uji", email: "staf.uji@example.com" });
+    expect((await participant(code)).current_page).toBe("cases_intro_r1");
   });
 
   test("PB-5 minutes in notulen style; Implisit has two questions, Eksplisit none", async ({
@@ -219,7 +206,7 @@ test.describe("PLAN-05 · flow B", () => {
     await expect(heading(page, "Daftar kasus acuan")).toBeVisible();
     await expect(page.getByText("Instruksi", { exact: true })).toBeVisible(); // banner, not a page
     await expect(page.getByRole("heading", { name: "Mempelajari kasus serupa" })).toHaveCount(0);
-    await expect(page.getByText(/Tersedia 14 kasus/)).toBeVisible();
+    await expect(page.getByText(/pelajari kembali kasus acuan/)).toBeVisible();
     await expect(page.locator("li[data-case]")).toHaveCount(14);
     await expect(page.getByText(/Dibuka\s+0\/14/)).toBeVisible();
     await expect(caseRow(page, 1).getByRole("combobox")).toHaveValue("");
@@ -245,7 +232,7 @@ test.describe("PLAN-05 · flow B", () => {
     page,
   }) => {
     const code = await startAt(page, 2, "review");
-    await expect(heading(page, "Reviu Atasan/Supervisor")).toBeVisible();
+    await expect(heading(page, "Reviu Supervisor")).toBeVisible();
     await expect(page.getByText("Berkas masuk")).toBeVisible();
     await expect(nextButton(page)).toBeDisabled();
     const early = await page.request.post("/api/p/advance", { data: { from: "review", items: {} } });
@@ -254,10 +241,10 @@ test.describe("PLAN-05 · flow B", () => {
     await expect(page.locator("main").getByText(/dibuka kembali melalui menu Berkas/)).toBeVisible();
     await waitForEvents(code, (rows) => rows.some((e) => e.type === "doc_open" && e.target === "review"));
     await expect(page.getByRole("navigation", { name: "Berkas penugasan" })).not.toContainText(
-      "Reviu Atasan",
+      "Reviu Supervisor",
     );
     await nextButton(page).click();
-    await expect(page.getByRole("navigation", { name: "Berkas penugasan" })).toContainText("Reviu Atasan");
+    await expect(page.getByRole("navigation", { name: "Berkas penugasan" })).toContainText("Reviu Supervisor");
   });
 
   test("PB-15 menu Berkas from the case list of round 1 shows the Berita Acara in notulen style", async ({
@@ -315,8 +302,6 @@ test.describe("PLAN-05 · flow B", () => {
     await expect(openButton(page, "Buka memo")).toBeVisible();
     await here();
     await openButton(page, "Buka memo").click();
-    await page.getByLabel("Nama lengkap").fill("Staf Uji");
-    await page.getByLabel("Alamat email").fill("staf.uji@example.com");
     await nextButton(page).click();
     await expect(heading(page, "Mempelajari kasus serupa")).toBeVisible(); // cases_intro_r1
     await here();
@@ -407,7 +392,7 @@ test.describe("PLAN-05 · flow B", () => {
     expect(Object.keys(saved).filter((k) => k.startsWith("cov_q"))).toHaveLength(5);
     expect([saved.mc_q1, saved.mc_q2, saved.mc_q3]).toEqual([1, 2, 2]);
     expect([saved.mc_likert1, saved.mc_likert2, saved.mc_likert3, saved.mc_likert4]).toEqual([4, 4, 5, 5]);
-    expect([saved.semester, saved.gender, saved.age, saved.education]).toEqual([5, 1, 21, 2]);
+    expect([saved.semester, saved.gender, saved.age, saved.university]).toEqual([5, 1, 21, 2]);
     await expect(page.getByText("Segera hadir")).toHaveCount(0);
 
     const docs = await eventsOf(code, ["doc_open"]);

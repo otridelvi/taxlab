@@ -123,7 +123,7 @@ test.describe("PLAN-03 · participant flow", () => {
     await clickNext(page);
     await clickNext(page, "Buka memo penugasan");
     await expect(heading(page, "Memo Penugasan")).toBeVisible();
-    await expect(page.getByText("Anda tidak harus mencantumkan nama dan alamat email anda")).toBeVisible(); // Lemah
+    await expect(page.getByText("17 Juli 2026")).toBeVisible();
     await expect(page.getByLabel("Alamat email")).toHaveCount(0);
     await clickNext(page);
     await expect(heading(page, "Mempelajari kasus serupa")).toBeVisible();
@@ -131,7 +131,7 @@ test.describe("PLAN-03 · participant flow", () => {
     expect(p.current_round).toBe(1);
   });
 
-  test("P3-8 Sel 4: Eksplisit Berita Acara without questions, Memo Kuat needs name and email", async ({
+  test("P3-8 Sel 4: Eksplisit Berita Acara without questions, Memo without identity fields", async ({
     page,
   }) => {
     const [code] = await makeCodes([4]);
@@ -141,25 +141,11 @@ test.describe("PLAN-03 · participant flow", () => {
     await expect(page.getByRole("radio")).toHaveCount(0);
     await clickNext(page);
     await clickNext(page, "Buka memo penugasan");
-    await expect(
-      page.getByText("Anda harus mencantumkan nama anda dan alamat pos elektronik (email anda)"),
-    ).toBeVisible();
-    await page.getByLabel("Nama lengkap").fill("Budi Santoso");
-    await page.getByLabel("Alamat email").fill("budi@");
-    await clickNext(page);
-    await expect(page.getByRole("alert").filter({ hasText: "Lengkapi" })).toHaveText(
-      "Lengkapi alamat email terlebih dahulu.",
-    );
-    await page.getByLabel("Alamat email").fill("Budi@Example.com");
+    await expect(heading(page, "Memo Penugasan")).toBeVisible();
+    await expect(page.getByLabel("Nama lengkap")).toHaveCount(0);
+    await expect(page.getByLabel("Alamat email")).toHaveCount(0);
     await clickNext(page);
     await expect(heading(page, "Mempelajari kasus serupa")).toBeVisible();
-    const p = await participant(code);
-    const { data: contact } = await serviceClient()
-      .from("contacts")
-      .select("name, email")
-      .eq("participant_id", p.id)
-      .single();
-    expect(contact).toEqual({ name: "Budi Santoso", email: "budi@example.com" });
     expect(await page.content()).not.toMatch(/"cell"|Sel 4/);
   });
 

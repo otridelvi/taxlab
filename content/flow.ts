@@ -1,7 +1,7 @@
 import type { Factors } from "@/lib/cell";
 import type { ItemSpec } from "@/lib/items";
 import { COV, COV_B, DEMO_TEXT, MINUTES_QUESTIONS, REC_LABELS } from "./text";
-import { EDUCATION, EWALLETS, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, MC_QUESTIONS } from "./questions";
+import { EWALLETS, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, MC_QUESTIONS, UNIVERSITY } from "./questions";
 
 /**
  * Participant flow as configuration (FSD-Participant §4). The page shown is
@@ -196,11 +196,11 @@ const demographicItems = (): ItemSpec[] => [
     max: 80,
   },
   {
-    key: "education",
+    key: "university",
     type: "choice",
-    legend: DEMO_TEXT.education,
-    options: EDUCATION,
-    name: "tingkat pendidikan",
+    legend: DEMO_TEXT.university,
+    options: UNIVERSITY,
+    name: "universitas",
     pills: true,
   },
   {
@@ -255,30 +255,6 @@ const minutesItems = (f: Factors): ItemSpec[] =>
       }))
     : [];
 
-const memoItems = (f: Factors): ItemSpec[] =>
-  f.acc === "strong"
-    ? [
-        {
-          key: "contact_name",
-          type: "text",
-          label: "Nama lengkap",
-          name: "nama lengkap",
-          autoComplete: "name",
-          maxLength: 120,
-          contact: "name",
-        },
-        {
-          key: "contact_email",
-          type: "email",
-          label: "Alamat email",
-          name: "alamat email",
-          autoComplete: "email",
-          maxLength: 254,
-          contact: "email",
-        },
-      ]
-    : [];
-
 /** Alur A (PRD 0.2 §6.3, default). */
 export const FLOW_A: readonly Step[] = [
   { id: "welcome", kind: "text", section: "welcome", next: "Mulai penugasan" },
@@ -291,7 +267,7 @@ export const FLOW_A: readonly Step[] = [
   { id: "facts_4", kind: "facts", section: "files" },
   { id: "minutes", kind: "minutes", section: "files", items: minutesItems },
   { id: "memo_intro", kind: "text", section: "files", next: "Buka memo penugasan" },
-  { id: "memo", kind: "memo", section: "files", items: memoItems },
+  { id: "memo", kind: "memo", section: "files" },
   { id: "cases_intro_r1", kind: "text", section: "cases", round: 1, next: "Lihat kasus acuan" },
   { id: "cases_r1", kind: "cases", section: "cases", round: 1, menu: M3, items: casesItems(1) },
   { id: "covariates", kind: "mcq", section: "questions", round: 1, menu: M3, items: covariateItems },
@@ -340,7 +316,7 @@ export const FLOW_B: readonly Step[] = [
   { id: "facts_1", kind: "facts", section: "files", map: "facts" },
   { id: "facts_costs", kind: "facts", section: "files", map: "facts" },
   { id: "minutes", kind: "minutes", section: "files", map: "minutes", items: minutesItems },
-  { id: "memo", kind: "memo", section: "files", map: "memo", gate: "memo", items: memoItems },
+  { id: "memo", kind: "memo", section: "files", map: "memo", gate: "memo" },
   { id: "cases_intro_r1", kind: "text", section: "cases", round: 1, next: "Lihat kasus acuan" },
   { id: "cases_r1", kind: "cases", section: "cases", round: 1, menu: M3, items: casesItems(1) },
   { id: "covariates", kind: "mcq", section: "questions", round: 1, menu: M3, items: covariateItemsB },

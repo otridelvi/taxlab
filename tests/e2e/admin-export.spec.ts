@@ -130,7 +130,7 @@ test.describe("PLAN-07a export and detail", () => {
     expect(row.rec_knowhow_delta).toBe("-50000000");
     expect(row.confidence_delta).toBe("20");
     expect(row.mc_pass_pref).toBe("1"); // cell 4 = explicit, option 1
-    expect(row.mc_pass_acc).toBe("1"); // cell 4 = strong, option 2
+    expect(row.mc_pass_review).toBe(""); // mc_q2 key still empty (PLAN-09 D-5)
     expect(row.semester).toBe("5");
     expect(text).not.toContain(SECRET_NAME);
     expect(cols.some((c) => /^(name|email|phone|ewallet)$/.test(c))).toBe(false);

@@ -6,7 +6,7 @@
 
 export const CONSENT = [
   "Studi yang akan anda ikuti adalah tentang penyelesaian SPT tahunan bagi klien anda. Jika anda setuju untuk berpartisipasi studi ini, anda akan berperan sebagai staf konsultan pajak. Untuk dapat menyelesaikan pekerjaan ini, anda kemudian mendapatkan informasi-informasi yang harus anda pelajari terlebih dahulu. Anda harus mempertimbangkan informasi yang tersedia tersebut untuk menyelesaikan penugasan ini. Anda membutuhkan waktu lebih kurang <strong>40 menit tak terputus</strong> untuk menyelesaikan penugasan ini.",
-  "Tidak ada risiko fisik atau mental apapun yang harus anda tanggung selama pelaksanaan penugasan ini. Anda akan mendapatkan insentif atas partisipasi anda pada penelitian ini. Insentif tersebut akan dikonversikan ke dalam bentuk dompet elektronik (e-wallet) senilai <strong>Rp75.000</strong> untuk kemudahan dan kecepatan pemberiannya karena studi ini dilakukan secara daring (online).",
+  "Tidak ada risiko fisik atau mental apapun yang harus anda tanggung selama pelaksanaan penugasan ini. Anda akan mendapatkan insentif atas partisipasi anda pada penelitian ini. Insentif tersebut akan dikonversikan ke dalam bentuk dompet elektronik (e-wallet) senilai <strong>Rp60.000</strong> untuk kemudahan dan kecepatan pemberiannya karena studi ini dilakukan secara daring (online).",
   'Pertanyaan, komentar, saran atau informasi lebih lanjut atas penelitian ini dapat disampaikan langsung kepada peneliti Fauzan Misra melalui nomor handphone 081374166725 atau alamat email: <a href="mailto:fauzanmisra@eb.unand.ac.id">fauzanmisra@eb.unand.ac.id</a>.',
   "Jika anda setuju untuk berpartisipasi di dalam penelitian ini, silakan log in untuk masuk ke dalam laman penugasan.",
 ] as const;
@@ -17,7 +17,7 @@ export const WELCOME = [
 ] as const;
 
 export const ROLE_P1 =
-  "Dalam studi ini anda berperan sebagai seorang <strong>profesional pajak yang bekerja sebagai staf pada sebuah kantor konsultan pajak</strong>. Anda bertanggung jawab untuk <strong>mencari informasi</strong> mengenai transaksi klien dan <strong>membuat rekomendasi awal</strong> yang akan disampaikan kepada atasan anda. Tidak ada jawaban yang salah dalam penyelesaian kasus ini." as const;
+  "Dalam studi ini anda berperan sebagai seorang <strong>profesional pajak yang bekerja sebagai staf pada sebuah kantor konsultan pajak</strong>. Anda bertanggung jawab untuk <strong>mencari informasi</strong> mengenai transaksi klien dan <strong>membuat rekomendasi awal</strong> yang akan disampaikan kepada atasan anda. Setelah menyampaikan rekomendasi awal, atasan anda akan memberikan arahan lebih lanjut, dan anda diminta kembali untuk menyampaikan <strong>rekomendasi akhir</strong>. Tidak ada jawaban yang salah dalam penyelesaian kasus ini." as const;
 
 export const ROLE_STEPS = [
   "Membaca kasus pajak klien",
@@ -25,7 +25,9 @@ export const ROLE_STEPS = [
   "Membaca memo penugasan",
   "Pencarian informasi dari kasus-kasus pajak serupa pada perusahaan lain",
   "Memeringkat informasi",
-  "Membuat rekomendasi pajak",
+  "Membuat usulan awal",
+  "Menerima arahan atasan terhadap usulan awal",
+  "Menyampaikan rekomendasi akhir untuk atasan",
 ] as const;
 
 export const ROLE_P2 =
@@ -110,21 +112,11 @@ export const MEMO_INTRO = [
 
 export const MEMO_BODY = [
   "PT Cahaya Gama adalah salah satu klien korporat yang bergerak dalam bisnis pemanufakturan dan telah menjadi klien kita selama beberapa tahun. Kita sedang dalam proses menyiapkan Surat Pemberitahuan (SPT) Tahunan Pajak Penghasilan Badan untuk PT Cahaya Gama (jika dibutuhkan, fakta klien dapat anda lihat kembali dengan mengklik pada menu “Fakta Klien” dan ikhtisar berita acara dengan mengklik “Berita Acara” setelah anda selesai membaca memo ini). Tujuan dari tugas anda adalah <strong>mempelajari, memeringkat dan menyimpan</strong> kasus-kasus yang mirip dengan kasus yang dihadapi oleh klien kita ke dalam buku catatan untuk kemudian menjadi acuan pembuatan rekomendasi anda mengenai transaksi klien.",
-  "Kasus-kasus acuan tersebut telah disediakan pada halaman selanjutnya. Perlu menjadi perhatian anda bahwa:",
+  "Kasus-kasus acuan tersebut telah disediakan pada halaman selanjutnya.",
 ] as const;
 
-export const MEMO_WEAK = [
-  "Anda tidak harus mencantumkan nama dan alamat email anda",
-  "Rekomendasi dan respon anda lainnya diperbolehkan anonim",
-  "Hasil pekerjaan anda akan dirapatkan bersama dengan anggota tim lainnya untuk mendapatkan masukan atau perbaikan lainnya yang diperlukan",
-] as const;
-
-export const MEMO_STRONG = [
-  "Anda harus mencantumkan nama anda dan alamat pos elektronik (email anda)",
-  "Anda akan mendapatkan balikan formal atas pekerjaan anda",
-  "Manajer/penyelia akan memberikan komentar spesifik atas kinerja anda",
-  "Setelah mempelajari balikan dari atasan anda, hasil perbaikan anda akan dibawa ke rapat tim untuk didiskusikan lebih lanjut",
-] as const;
+/** Memo date as in the researcher's PPT (PLAN-09 A-2). */
+export const MEMO_DATE = "17 Juli 2026" as const;
 
 export const MEMO_REMIND =
   "Tugas anda adalah mempelajari, memeringkat dan menyimpan semua kasus-kasus yang ingin anda acu dan pelajari lebih mendalam untuk menentukan posisi anda terhadap kasus yang dihadapi." as const;
@@ -143,6 +135,15 @@ export const CASES_LIST = [
 export const RANK_ORDER =
   "Setelah selesai membaca kasus-kasus, silakan masukkan cacah (angka) peringkat dari <strong>1 sampai 14</strong> berdasarkan pentingnya kasus tersebut bagi anda dan pilih <strong>YA</strong> atau <strong>TIDAK</strong> untuk menentukan apakah informasi tersebut akan anda acu dalam pembuatan rekomendasi. Kolom-kolom tersebut tersedia di sebelah kanan DETAIL." as const;
 
+/** Round 2 instructions (slide 24 of the researcher's PPT): shown as a banner in flow B, as a page in flow A. */
+export const CASES2_INTRO = [
+  "Setelah mempelajari fakta klien, ikhtisar pertemuan dengan klien dan reviu oleh supervisor, silakan anda pelajari kembali kasus acuan sebelumnya.",
+] as const;
+export const CASES2_REMIND =
+  "Diingatkan kembali, tugas anda adalah mempelajari, memeringkat dan menyimpan semua kasus-kasus yang ingin anda acu dan pelajari lebih mendalam untuk menentukan posisi anda terhadap kasus yang dihadapi, seperti yang anda lakukan sebelumnya." as const;
+export const CASES2_FOOT =
+  "Anda dapat membaca kembali memo penugasan dan fakta klien melalui menu Berkas penugasan, jika anda merasa membutuhkannya." as const;
+
 export const ATTN =
   "Perhatikan juga waktu anda yang masih tersedia sehingga anda dapat memprioritaskan pencarian informasi anda kepada informasi yang menurut anda paling penting terlebih dahulu." as const;
 
@@ -156,10 +157,10 @@ export const REC_INTRO_2 =
   "Berdasarkan reviu dari supervisor yang anda terima dan informasi yang telah anda cari, nyatakan <strong>rekomendasi</strong> dalam bentuk usulan besaran biaya untuk akun-akun yang dikonsultasikan tersebut." as const;
 
 export const DEBRIEF = [
-  "Saya mengucapkan terima kasih banyak atas waktu yang diberikan untuk kelancaran proses penelitian ini. Penelitian ini adalah penelitian yang dilakukan untuk penyelesaian disertasi saya pada Program Doktor Akuntansi FEB UGM.",
-  "Penelitian ini bertujuan untuk menguji pengaruh preferensi klien dan tekanan akuntabilitas terhadap perilaku pencarian informasi dan pembuatan rekomendasi pajak oleh staf. Preferensi klien dapat disampaikan secara implisit maupun eksplisit sedangkan tekanan akuntabilitas berupa tekanan akuntabilitas dari atas yang dibagi menjadi tekanan kuat dan tekanan lemah.",
-  "Anda sengaja saya bagi menjadi 4 kelompok perlakuan (<em>treatment</em>) sesuai dengan rancangan penelitian ini. Kelompok perlakuan pertama adalah staf dengan preferensi klien yang disampaikan secara implisit dan tekanan akuntabilitas lemah. Kelompok perlakuan kedua adalah staf dengan preferensi klien yang disampaikan secara eksplisit dan tekanan akuntabilitas lemah. Kelompok perlakuan ketiga adalah staf dengan preferensi klien yang disampaikan secara implisit dan tekanan akuntabilitas kuat sedangkan kelompok terakhir adalah staf dengan preferensi klien yang disampaikan secara eksplisit dan tekanan akuntabilitas kuat.",
-  "Saya menguji hipotesis penelitian saya berdasarkan 4 perlakuan yang berbeda tersebut.",
+  "Saya mengucapkan terima kasih banyak atas waktu yang diberikan untuk kelancaran proses penelitian ini. Penelitian ini adalah penelitian yang dilakukan untuk penyelesaian penelitian pada FEB UNAND.",
+  "Penelitian ini bertujuan untuk menguji pengaruh preferensi klien, pengetahuan, dan reviu oleh atasan terhadap perilaku pencarian informasi dan pembuatan rekomendasi pajak oleh staf. Preferensi klien dapat disampaikan secara implisit maupun eksplisit sedangkan reviu oleh atasan diperlakukan ada atau tidak ada reviu (dengan memasukkan <em>placebo effect</em>, sehingga semua partisipan menerima halaman reviu supervisor).",
+  "Anda sengaja saya bagi menjadi beberapa kelompok perlakuan (<em>treatment</em>) sesuai dengan rancangan penelitian ini. Kelompok perlakuan pertama adalah staf dengan preferensi klien yang disampaikan secara implisit dan adanya reviu atasan. Kelompok perlakuan kedua adalah staf dengan preferensi klien yang disampaikan secara eksplisit dan ada reviu atasan. Kelompok perlakuan ketiga adalah staf dengan preferensi klien yang disampaikan secara implisit dan tidak ada reviu spesifik dari atasan, sedangkan kelompok terakhir adalah staf dengan preferensi klien yang disampaikan secara eksplisit dan tidak ada reviu spesifik dari atasan. Pengetahuan diukur dari jawaban dan dibedakan menjadi tinggi dan rendah.",
+  "Saya menguji hipotesis penelitian saya berdasarkan perlakuan yang berbeda tersebut.",
   "Saya sangat menghargai semua bantuan anda pada hari ini. Sekali lagi saya mengucapkan terima kasih yang sebesar-besarnya dan semoga menjadi amal ibadah bagi kita semua.",
 ] as const;
 
@@ -229,16 +230,29 @@ export const CONF_TEXT =
   "Berdasarkan rekomendasi yang anda berikan, nyatakan keyakinan anda bahwa saran yang anda berikan akan dapat dipertahankan jika nanti ditantang atau menjadi temuan pemeriksa dalam skala 0 sampai 100%." as const;
 
 /**
- * Reviu Atasan/Supervisor: PLACEHOLDER until the researcher answers PERTANYAAN A6/Q8
- * (final text, and whether it differs per cell). To vary it per factor, branch on
- * `Factors` in `reviewParas()` (components/participant/steps.tsx).
+ * Reviu Supervisor. Sel 1 (implisit + reviu spesifik) has its final text (REVIEW_SEL1_*, PLAN-09);
+ * Sel 2-4 stay lorem ipsum (REVIEW_BODY) until the researcher sends their texts. Per-cell choice
+ * lives in `reviewContent()` (components/participant/steps.tsx).
  */
-export const REVIEW_TITLE = "Reviu Atasan/Supervisor" as const;
+export const REVIEW_TITLE = "Reviu Supervisor" as const;
+export const REVIEW_FROM = "Supervisor Pajak" as const;
+export const REVIEW_DATE = "1 Agustus 2026" as const;
 export const REVIEW_SUBJECT = "PT Cahaya Gama, hasil reviu rekomendasi" as const;
 export const REVIEW_BODY = [
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper.",
   "Maecenas faucibus mollis interdum. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.",
   "[Isi reviu atasan menunggu materi dari peneliti.]",
+] as const;
+export const REVIEW_SEL1_BODY = [
+  "PT Cahaya Gama adalah salah satu klien korporat yang bergerak dalam bisnis pemanufakturan dan telah menjadi klien kita selama beberapa tahun. Kita sedang dalam proses menyiapkan Surat Pemberitahuan (SPT) Tahunan Pajak Penghasilan Badan untuk PT Cahaya Gama (jika dibutuhkan, fakta klien dapat anda lihat kembali dengan mengklik pada menu “Fakta Klien” dan ikhtisar berita acara dengan mengklik “Berita Acara” setelah anda selesai membaca reviu ini). Tujuan dari tugas anda adalah <strong>mempelajari, memeringkat dan menyimpan</strong> kasus-kasus yang mirip dengan kasus yang dihadapi oleh klien kita ke dalam buku catatan untuk kemudian menjadi acuan pembuatan rekomendasi anda mengenai transaksi klien. Kasus-kasus acuan tersebut telah disediakan pada halaman selanjutnya.",
+  "Hal-hal berikut ini perlu menjadi perhatian anda:",
+] as const;
+export const REVIEW_SEL1_POINTS = [
+  "Sampaikan telaah dan usulan awal anda melalui email saya di dewantara@pajak.wiradana.or.id",
+  "Pastikan apakah strategi dan dasar hukum yang digunakan sudah aman dan sesuai yurisprudensi",
+  "Pastikan apakah proses, metode, dan rujukan hukumnya sudah sesuai dengan aturan main yang benar",
+  "Yakini bahwa angka yang anda usulkan sudah benar, baik dari sisi regulasi maupun laporan (angka-angka) yang menjadi rujukan",
+  "Catatan perbaikan (review notes), revisi kertas kerja, atau penyesuaian angka/kebijakan akan disampaikan melalui email anda.",
 ] as const;
 export const REVIEW_FOOT = "Reviu ini dapat dibuka kembali melalui menu Berkas penugasan." as const;
 
@@ -271,7 +285,7 @@ export const REF_LABELS = {
   facts: "Fakta Klien",
   minutes: "Berita Acara",
   memo: "Memo Penugasan",
-  review: "Reviu Atasan",
+  review: "Reviu Supervisor",
 } as const;
 
 /** Flow B (B-12): no letters; "A dan B benar" becomes "Kedua jawaban di atas benar". Same option order and numbering. */
@@ -285,9 +299,9 @@ export const ENVELOPE = {
   kick: "Berkas masuk",
   memo: { title: "Memo Penugasan", subject: "PT Cahaya Gama, rekonsiliasi fiskal", button: "Buka memo" },
   review: {
-    title: "Reviu Atasan/Supervisor",
+    title: "Reviu Supervisor",
     subject: "PT Cahaya Gama, hasil reviu rekomendasi",
-    intro: "Anda menerima dokumen reviu dari atasan anda.",
+    intro: "Anda menerima dokumen reviu dari supervisor anda.",
     button: "Buka reviu",
   },
 } as const;
@@ -319,7 +333,7 @@ export const DEMO_TEXT = {
   semester: { label: "Semester", placeholder: "mis. 5" },
   gender: "Jenis kelamin",
   age: { label: "Umur", unit: "tahun" },
-  education: "Tingkat pendidikan",
+  university: "Universitas",
   incentive: "Insentif e-wallet*",
   ewallet: "Jenis e-wallet",
   ewalletPlaceholder: "Pilih e-wallet",

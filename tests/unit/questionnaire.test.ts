@@ -28,7 +28,7 @@ test("PC-1 normalizePhone: accepted spellings and rejections", () => {
 
 const demographics = FLOW_B.find((s) => s.id === "demographics")!;
 const specs = itemsForStep(demographics, cellFactors(1));
-const base = { semester: 5, gender: 1, age: 21, education: 2 };
+const base = { semester: 5, gender: 1, age: 21, university: 2 };
 
 test("PC-2 requiredWith: e-wallet and phone are both or none", () => {
   const missing = (v: Record<string, unknown>) => stepProblems(specs, { ...base, ...v }).missing;
@@ -50,8 +50,8 @@ test("demographics: ranges and required fields", () => {
   assert.deepEqual(missing({ age: 81 }), ["age"]);
   assert.deepEqual(missing({ age: "abc" }), ["age"]);
   assert.deepEqual(missing({ gender: 3 }), ["gender"]);
-  assert.deepEqual(missing({ education: 5 }), ["education"]);
-  assert.deepEqual(stepProblems(specs, {}).missing, ["semester", "gender", "age", "education"]);
+  assert.deepEqual(missing({ university: 5 }), ["university"]);
+  assert.deepEqual(stepProblems(specs, {}).missing, ["semester", "gender", "age", "university"]);
 });
 
 test("contact fields go to contacts, normalised; cleared ones empty the contact", () => {
@@ -83,10 +83,10 @@ test("likert accepts 1–5 only", () => {
 });
 
 test("PC-3 answer keys per cell", () => {
-  assert.deepEqual(mcKey(cellFactors(1)), { mc_q1: 2, mc_q2: 1, mc_q3: 2 }); // implicit / weak
-  assert.deepEqual(mcKey(cellFactors(2)), { mc_q1: 1, mc_q2: 1, mc_q3: 2 }); // explicit / weak
-  assert.deepEqual(mcKey(cellFactors(3)), { mc_q1: 2, mc_q2: 2, mc_q3: 2 }); // implicit / strong
-  assert.deepEqual(mcKey(cellFactors(4)), { mc_q1: 1, mc_q2: 2, mc_q3: 2 }); // explicit / strong
+  assert.deepEqual(mcKey(cellFactors(1)), { mc_q1: 2, mc_q2: null, mc_q3: null }); // implicit / specific review
+  assert.deepEqual(mcKey(cellFactors(2)), { mc_q1: 1, mc_q2: null, mc_q3: null }); // explicit / specific review
+  assert.deepEqual(mcKey(cellFactors(3)), { mc_q1: 2, mc_q2: null, mc_q3: null }); // implicit / non-specific review
+  assert.deepEqual(mcKey(cellFactors(4)), { mc_q1: 1, mc_q2: null, mc_q3: null }); // explicit / non-specific review
   assert.equal(COV_KEY, null);
 });
 

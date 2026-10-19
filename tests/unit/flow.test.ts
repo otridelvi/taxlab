@@ -65,7 +65,7 @@ test("round tags: _r1 pages in round 1, _r2 pages in round 2, review outside", (
   assert.equal(getStep(FLOW_A, "review")?.round, undefined);
 });
 
-test("minutes questions only for Implisit cells, name/email only for Kuat cells", () => {
+test("minutes questions only for Implisit cells, memo has no questions", () => {
   const minutes = getStep(FLOW_A, "minutes")!;
   const memo = getStep(FLOW_A, "memo")!;
   assert.deepEqual(
@@ -78,17 +78,14 @@ test("minutes questions only for Implisit cells, name/email only for Kuat cells"
     ["ba_q1", "ba_q2"],
   );
   assert.deepEqual(itemsForStep(memo, cellFactors(1)), []);
-  assert.deepEqual(
-    itemsForStep(memo, cellFactors(4)).map((i) => i.key),
-    ["contact_name", "contact_email"],
-  );
+  assert.deepEqual(itemsForStep(memo, cellFactors(4)), []);
 });
 
 test("cell factors", () => {
-  assert.deepEqual(cellFactors(1), { pref: "impl", acc: "weak" });
-  assert.deepEqual(cellFactors(2), { pref: "expl", acc: "weak" });
-  assert.deepEqual(cellFactors(3), { pref: "impl", acc: "strong" });
-  assert.deepEqual(cellFactors(4), { pref: "expl", acc: "strong" });
+  assert.deepEqual(cellFactors(1), { pref: "impl", review: "yes" });
+  assert.deepEqual(cellFactors(2), { pref: "expl", review: "yes" });
+  assert.deepEqual(cellFactors(3), { pref: "impl", review: "no" });
+  assert.deepEqual(cellFactors(4), { pref: "expl", review: "no" });
   assert.throws(() => cellFactors(5));
 });
 

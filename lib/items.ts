@@ -23,7 +23,7 @@ export type ChoiceItem = {
   letters?: boolean;
   /** Question number shown before the legend. */
   number?: number;
-  /** Show the options as pills in a row (gender, education) instead of a list. */
+  /** Show the options as pills in a row (gender, university) instead of a list. */
   pills?: boolean;
   group?: ItemGroup;
   required?: boolean;

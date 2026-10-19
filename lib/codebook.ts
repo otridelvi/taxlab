@@ -1,5 +1,5 @@
 import { COV, MINUTES_QUESTIONS } from "@/content/text";
-import { EDUCATION, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, MC_QUESTIONS } from "@/content/questions";
+import { UNIVERSITY, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, MC_QUESTIONS } from "@/content/questions";
 import { CASE_COUNT, REC_ACCOUNTS, pad2 } from "@/lib/metrics";
 
 /**
@@ -120,9 +120,9 @@ export function buildCodebook(): CodebookVar[] {
 
   push(
     def("code", "Identitas", "Kode akses partisipan", "text", "TX-XXXX-XXXX", "participants"),
-    def("cell", "Identitas", "Sel perlakuan", "int", "1 = implisit/lemah, 2 = eksplisit/lemah, 3 = implisit/kuat, 4 = eksplisit/kuat", "participants"),
+    def("cell", "Identitas", "Sel perlakuan", "int", "1 = implisit/reviu spesifik, 2 = eksplisit/reviu spesifik, 3 = implisit/reviu tidak spesifik, 4 = eksplisit/reviu tidak spesifik", "participants"),
     def("pref", "Identitas", "Faktor preferensi klien", "text", "impl, expl", "participants.cell"),
-    def("acc", "Identitas", "Faktor akuntabilitas", "text", "weak, strong", "participants.cell"),
+    def("review", "Identitas", "Faktor reviu atasan", "text", "yes (spesifik), no (tidak spesifik)", "participants.cell"),
     def("batch", "Identitas", "Label batch kode", "text", "teks", "batches"),
     def("status", "Identitas", "Status partisipan", "text", "not_started, in_progress, completed, timed_out, cancelled", "participants"),
     def("content_version", "Identitas", "Versi konten yang dilihat partisipan", "text", "teks", "participants"),
@@ -185,11 +185,11 @@ export function buildCodebook(): CodebookVar[] {
   );
   push(
     def("mc_pass_pref", "Cek manipulasi", "Lulus cek preferensi klien (mc_q1 sesuai sel)", "flag", YN, "dihitung"),
-    def("mc_pass_acc", "Cek manipulasi", "Lulus cek akuntabilitas (mc_q2 sesuai sel)", "flag", YN, "dihitung"),
+    def("mc_pass_review", "Cek manipulasi", "Lulus cek reviu (mc_q2 sesuai kunci; kosong selama kunci belum ada)", "flag", YN, "dihitung"),
     def("semester", "Demografi", "Semester", "int", "1–20", "halaman Demografi"),
     def("gender", "Demografi", "Jenis kelamin", "int", options(GENDER), "halaman Demografi"),
     def("age", "Demografi", "Umur", "int", "tahun", "halaman Demografi"),
-    def("education", "Demografi", "Tingkat pendidikan", "int", options(EDUCATION), "halaman Demografi"),
+    def("university", "Demografi", "Universitas", "int", options(UNIVERSITY), "halaman Demografi"),
   );
   return list;
 }

@@ -166,7 +166,7 @@ export type DemographicAnswers = {
   semester?: string;
   gender?: 1 | 2;
   age?: string;
-  education?: 1 | 2 | 3 | 4;
+  university?: 1 | 2;
   ewallet?: string;
   phone?: string;
 };
@@ -180,8 +180,8 @@ export async function answerDemographics(page: Page, a: DemographicAnswers = {})
     .check();
   await page.getByLabel("Umur", { exact: true }).fill(a.age ?? "21");
   await page
-    .locator('input[name="education"]')
-    .nth((a.education ?? 2) - 1)
+    .locator('input[name="university"]')
+    .nth((a.university ?? 2) - 1)
     .check();
   if (a.ewallet) await page.getByLabel("Jenis e-wallet").selectOption(a.ewallet);
   if (a.phone) await page.getByLabel("No. HP").fill(a.phone);

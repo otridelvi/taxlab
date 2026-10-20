@@ -167,6 +167,6 @@ test("getFlow: B by default, A for participants who started on A", () => {
 });
 
 test("flow B texts do not leak rounds or cells", () => {
-  const shown = JSON.stringify([T.ENVELOPE, T.INSTRUCTION_TITLES, T.FILE_MAP, T.COV_B, T.REC_TEXT.footB]);
+  const shown = JSON.stringify([T.ENVELOPE, T.SUPERVISOR_DOC, T.cases2Intro("yes"), T.cases2Intro("no"), T.recIntro2("yes"), T.recIntro2("no"), T.INSTRUCTION_TITLES, T.FILE_MAP, T.COV_B, T.REC_TEXT.footB]);
   assert.doesNotMatch(shown, /putaran|sel \d|implisit|eksplisit|lemah|kuat/i);
 });

@@ -100,7 +100,7 @@ export const MIN_IMPL =
   "Dari pertemuan dengan klien, Manajemen PT Cahaya Gama menyatakan bahwa staf mereka telah menyiapkan draft rekonsiliasi fiskal sementara, namun mereka ingin untuk mendapatkan saran ahli yang lebih mengerti dan berpengalaman. Mereka menyatakan bahwa <strong>saran-saran dan penyesuaian yang diberikan akan sangat diperhatikan dan dievaluasi</strong> dengan mempertimbangkan kos-manfaat yang muncul terkait dengan rencana pengembangan usaha mereka dan prospek kerjasama di masa depan." as const;
 
 export const MIN_EXPL = [
-  "Dari pertemuan dengan klien, Manajemen PT Cahaya Gama menyatakan bahwa staf mereka telah menyiapkan draft rekonsiliasi fiskal sementara, namun mereka ingin untuk mendapatkan saran ahli yang lebih mengerti dan berpengalaman. Mereka menyatakan bahwa <strong>mereka menginginkan posisi tertentu untuk akun-akun yang didiskusikan</strong> meskipun saran-saran dan penyesuaian yang diberikan akan tetap dipertimbangkan. Menurut mereka, rencana akuisisi akan lebih mudah terealisasi jika penghematan pajak berhasil dilakukan.",
+  "Dari pertemuan dengan klien, Manajemen PT Cahaya Gama menyatakan bahwa staf mereka telah menyiapkan draft rekonsiliasi fiskal sementara, namun mereka ingin untuk mendapatkan saran ahli yang lebih mengerti dan berpengalaman. Mereka menyatakan bahwa <strong>mereka menginginkan posisi tertentu untuk akun-akun yang didiskusikan</strong> meskipun saran-saran dan penyesuaian yang diberikan akan tetap dipertimbangkan. Menurut mereka, rencana pengembangan usaha akan lebih mudah terealisasi jika penghematan pajak berhasil dilakukan.",
   "Manajemen PT Cahaya Gama menekankan bahwa saran yang diberikan seharusnya memberikan manfaat bagi PT Cahaya Gama, terutama dalam rencana pengembangan usaha mereka dan mengingat hubungan kerja yang sudah lama terbangun. <strong>Saran yang konsisten dengan draft usulan PT Cahaya Gama akan lebih disukai.</strong>",
   "Manajemen PT Cahaya Gama juga menegaskan kepada atasan anda bahwa keberhasilan menghemat pajak akan mendukung keberhasilan rencana pengembangan usaha. Hal ini mempunyai arti bahwa kantor konsultan anda akan tetap menjadi konsultan pajak untuk perusahaan yang semakin berkembang dengan prospek fee yang lebih tinggi.",
 ] as const;
@@ -136,9 +136,9 @@ export const RANK_ORDER =
   "Setelah selesai membaca kasus-kasus, silakan masukkan cacah (angka) peringkat dari <strong>1 sampai 14</strong> berdasarkan pentingnya kasus tersebut bagi anda dan pilih <strong>YA</strong> atau <strong>TIDAK</strong> untuk menentukan apakah informasi tersebut akan anda acu dalam pembuatan rekomendasi. Kolom-kolom tersebut tersedia di sebelah kanan DETAIL." as const;
 
 /** Round 2 instructions (slide 24 of the researcher's PPT): shown as a banner in flow B, as a page in flow A. */
-export const CASES2_INTRO = [
-  "Setelah mempelajari fakta klien, ikhtisar pertemuan dengan klien dan reviu oleh supervisor, silakan anda pelajari kembali kasus acuan sebelumnya.",
-] as const;
+export const cases2Intro = (r: ReviewKind): readonly string[] => [
+  `Setelah mempelajari fakta klien, ikhtisar pertemuan dengan klien dan ${SUPERVISOR_DOC[r].noun} oleh supervisor, silakan anda pelajari kembali kasus acuan sebelumnya.`,
+];
 export const CASES2_REMIND =
   "Diingatkan kembali, tugas anda adalah mempelajari, memeringkat dan menyimpan semua kasus-kasus yang ingin anda acu dan pelajari lebih mendalam untuk menentukan posisi anda terhadap kasus yang dihadapi, seperti yang anda lakukan sebelumnya." as const;
 export const CASES2_FOOT =
@@ -153,8 +153,8 @@ export const CASES_FOOT =
 export const REC_INTRO_1 =
   "Berdasarkan kasus perusahaan klien, ikhtisar berita acara pertemuan dengan klien, memo penugasan, dan pertanyaan terkait pengetahuan anda mengenai kasus yang anda terima dan informasi yang telah anda cari, nyatakan <strong>rekomendasi</strong> dalam bentuk usulan besaran biaya untuk akun-akun yang dikonsultasikan tersebut." as const;
 
-export const REC_INTRO_2 =
-  "Berdasarkan reviu dari supervisor yang anda terima dan informasi yang telah anda cari, nyatakan <strong>rekomendasi</strong> dalam bentuk usulan besaran biaya untuk akun-akun yang dikonsultasikan tersebut." as const;
+export const recIntro2 = (r: ReviewKind): string =>
+  `Berdasarkan ${SUPERVISOR_DOC[r].noun} dari supervisor yang anda terima dan informasi yang telah anda cari, nyatakan <strong>rekomendasi</strong> dalam bentuk usulan besaran biaya untuk akun-akun yang dikonsultasikan tersebut.`;
 
 export const DEBRIEF = [
   "Saya mengucapkan terima kasih banyak atas waktu yang diberikan untuk kelancaran proses penelitian ini. Penelitian ini adalah penelitian yang dilakukan untuk penyelesaian penelitian pada FEB UNAND.",
@@ -230,31 +230,65 @@ export const CONF_TEXT =
   "Berdasarkan rekomendasi yang anda berikan, nyatakan keyakinan anda bahwa saran yang anda berikan akan dapat dipertahankan jika nanti ditantang atau menjadi temuan pemeriksa dalam skala 0 sampai 100%." as const;
 
 /**
- * Reviu Supervisor. Sel 1 (implisit + reviu spesifik) has its final text (REVIEW_SEL1_*, PLAN-09);
- * Sel 2-4 stay lorem ipsum (REVIEW_BODY) until the researcher sends their texts. Per-cell choice
- * lives in `reviewContent()` (components/participant/steps.tsx).
+ * Supervisor document (PLAN-09, PLAN-10). Cells with a specific review (Sel 1, 2) receive the
+ * "Reviu Supervisor"; cells without (Sel 3, 4) receive the "Catatan Supervisor" (one point, no
+ * e-mail). Everywhere the document is named (title, menu, envelope, round 2 intro, recommendation
+ * intro) the word follows `noun`, so a participant only ever sees one name. Chosen per cell in
+ * the server-rendered steps (components/participant/steps.tsx); never sent as a cell.
  */
-export const REVIEW_TITLE = "Reviu Supervisor" as const;
+export type ReviewKind = "yes" | "no";
 export const REVIEW_FROM = "Supervisor Pajak" as const;
 export const REVIEW_DATE = "1 Agustus 2026" as const;
-export const REVIEW_SUBJECT = "PT Cahaya Gama, hasil reviu rekomendasi" as const;
-export const REVIEW_BODY = [
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper.",
-  "Maecenas faucibus mollis interdum. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.",
-  "[Isi reviu atasan menunggu materi dari peneliti.]",
-] as const;
-export const REVIEW_SEL1_BODY = [
-  "PT Cahaya Gama adalah salah satu klien korporat yang bergerak dalam bisnis pemanufakturan dan telah menjadi klien kita selama beberapa tahun. Kita sedang dalam proses menyiapkan Surat Pemberitahuan (SPT) Tahunan Pajak Penghasilan Badan untuk PT Cahaya Gama (jika dibutuhkan, fakta klien dapat anda lihat kembali dengan mengklik pada menu “Fakta Klien” dan ikhtisar berita acara dengan mengklik “Berita Acara” setelah anda selesai membaca reviu ini). Tujuan dari tugas anda adalah <strong>mempelajari, memeringkat dan menyimpan</strong> kasus-kasus yang mirip dengan kasus yang dihadapi oleh klien kita ke dalam buku catatan untuk kemudian menjadi acuan pembuatan rekomendasi anda mengenai transaksi klien. Kasus-kasus acuan tersebut telah disediakan pada halaman selanjutnya.",
+export const REVIEW_SUBJECT = "PT Cahaya Gama, rekonsiliasi fiskal" as const;
+
+const supervisorBody = (noun: string): readonly string[] => [
+  `PT Cahaya Gama adalah salah satu klien korporat yang bergerak dalam bisnis pemanufakturan dan telah menjadi klien kita selama beberapa tahun. Kita sedang dalam proses menyiapkan Surat Pemberitahuan (SPT) Tahunan Pajak Penghasilan Badan untuk PT Cahaya Gama (jika dibutuhkan, fakta klien dapat anda lihat kembali dengan mengklik pada menu “Fakta Klien” dan ikhtisar berita acara dengan mengklik “Berita Acara” setelah anda selesai membaca ${noun} ini). Tujuan dari tugas anda adalah <strong>mempelajari, memeringkat dan menyimpan</strong> kasus-kasus yang mirip dengan kasus yang dihadapi oleh klien kita ke dalam buku catatan untuk kemudian menjadi acuan pembuatan rekomendasi anda mengenai transaksi klien. Kasus-kasus acuan tersebut telah disediakan pada halaman selanjutnya.`,
   "Hal-hal berikut ini perlu menjadi perhatian anda:",
-] as const;
-export const REVIEW_SEL1_POINTS = [
-  "Sampaikan telaah dan usulan awal anda melalui email saya di dewantara@pajak.wiradana.or.id",
-  "Pastikan apakah strategi dan dasar hukum yang digunakan sudah aman dan sesuai yurisprudensi",
-  "Pastikan apakah proses, metode, dan rujukan hukumnya sudah sesuai dengan aturan main yang benar",
-  "Yakini bahwa angka yang anda usulkan sudah benar, baik dari sisi regulasi maupun laporan (angka-angka) yang menjadi rujukan",
-  "Catatan perbaikan (review notes), revisi kertas kerja, atau penyesuaian angka/kebijakan akan disampaikan melalui email anda.",
-] as const;
-export const REVIEW_FOOT = "Reviu ini dapat dibuka kembali melalui menu Berkas penugasan." as const;
+];
+
+export const SUPERVISOR_DOC = {
+  yes: {
+    noun: "reviu",
+    title: "Reviu Supervisor",
+    refNo: "REVIU/[NOMOR]",
+    label: "Reviu Supervisor",
+    /** Section label in the header while this document is the page. */
+    section: "Reviu atasan",
+    body: supervisorBody("reviu"),
+    points: [
+      "Sampaikan telaah dan usulan awal anda melalui email saya di dewantara@pajak.wiradana.or.id",
+      "Pastikan apakah strategi dan dasar hukum yang digunakan sudah aman dan sesuai yurisprudensi",
+      "Pastikan apakah proses, metode, dan rujukan hukumnya sudah sesuai dengan aturan main yang benar",
+      "Yakini bahwa angka yang anda usulkan sudah benar, baik dari sisi regulasi maupun laporan (angka-angka) yang menjadi rujukan",
+      "Catatan perbaikan (review notes), revisi kertas kerja, atau penyesuaian angka/kebijakan akan disampaikan melalui email anda.",
+    ],
+    /** Several points: numbered list. */
+    ordered: true,
+    envelope: {
+      subject: REVIEW_SUBJECT,
+      intro: "Anda menerima dokumen reviu dari supervisor anda.",
+      button: "Buka reviu",
+    },
+    foot: "Reviu ini dapat dibuka kembali melalui menu Berkas penugasan.",
+  },
+  no: {
+    noun: "catatan",
+    title: "Catatan Supervisor",
+    refNo: "CATATAN/[NOMOR]",
+    label: "Catatan Supervisor",
+    section: "Catatan atasan",
+    body: supervisorBody("catatan"),
+    points: ["Lakukan pekerjaan secara seksama sesuai kode etik profesi."],
+    /** A single point: plain bullet, not "1.". */
+    ordered: false,
+    envelope: {
+      subject: REVIEW_SUBJECT,
+      intro: "Anda menerima catatan dari supervisor anda.",
+      button: "Buka catatan",
+    },
+    foot: "Catatan ini dapat dibuka kembali melalui menu Berkas penugasan.",
+  },
+} as const;
 
 /** Labels of the accounts on the recommendation page (same wording as the client draft). */
 export const REC_LABELS = [
@@ -285,7 +319,6 @@ export const REF_LABELS = {
   facts: "Fakta Klien",
   minutes: "Berita Acara",
   memo: "Memo Penugasan",
-  review: "Reviu Supervisor",
 } as const;
 
 /** Flow B (B-12): no letters; "A dan B benar" becomes "Kedua jawaban di atas benar". Same option order and numbering. */
@@ -298,12 +331,6 @@ export const COV_B = COV.map((q) => ({
 export const ENVELOPE = {
   kick: "Berkas masuk",
   memo: { title: "Memo Penugasan", subject: "PT Cahaya Gama, rekonsiliasi fiskal", button: "Buka memo" },
-  review: {
-    title: "Reviu Supervisor",
-    subject: "PT Cahaya Gama, hasil reviu rekomendasi",
-    intro: "Anda menerima dokumen reviu dari supervisor anda.",
-    button: "Buka reviu",
-  },
 } as const;
 
 export const INSTRUCTION_TITLES = [

@@ -301,7 +301,7 @@ test.describe("PLAN-04 · cases and recommendation", () => {
     expect((await savedAnswers(code)).confidence_r1).toBe(85);
 
     await nextButton(page).click();
-    await expect(heading(page, "Reviu Supervisor")).toBeVisible();
+    await expect(heading(page, "Catatan Supervisor")).toBeVisible();
     expect((await participant(code)).current_page).toBe("review");
   });
 

@@ -6,7 +6,7 @@ import { startRef, stopRef, type CloseReason } from "./reading";
 import s from "./p.module.css";
 
 /**
- * Menu "Berkas penugasan" (PRD P-70–P-73): Fakta Klien, Berita Acara, Memo (+ Reviu Atasan
+ * Menu "Berkas penugasan" (PRD P-70–P-73): Fakta Klien, Berita Acara, Memo (+ Reviu/Catatan Supervisor
  * in round 2) open in a side panel (desktop) or full screen (phone) without leaving the
  * page. The documents are rendered on the server for the participant's cell and handed over
  * here as ready-made elements, so the cell never reaches the browser.
@@ -16,6 +16,7 @@ type Open = "menu" | RefKey | null;
 
 type Ctx = {
   keys: readonly RefKey[];
+  labels: Record<RefKey, string>;
   docs: Partial<Record<RefKey, ReactNode>>;
   open: Open;
   openDoc: (key: RefKey) => void;
@@ -59,10 +60,13 @@ function Icon({ name }: { name: keyof typeof ICONS }) {
 export function RefProvider({
   keys,
   docs,
+  reviewLabel,
   children,
 }: {
   keys: readonly RefKey[];
   docs: Partial<Record<RefKey, ReactNode>>;
+  /** Menu name of the supervisor document: "Reviu Supervisor" or "Catatan Supervisor" (PLAN-10, chosen on the server). */
+  reviewLabel: string;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState<Open>(null);
@@ -81,6 +85,7 @@ export function RefProvider({
 
   const value: Ctx = {
     keys,
+    labels: { ...REF_LABELS, review: reviewLabel },
     docs,
     open,
     openDoc: (key) => change(key, "toggle"),
@@ -97,7 +102,7 @@ export function RefProvider({
 
 /** Desktop: a bar of buttons above the content. Hidden on phones (the header button replaces it). */
 export function RefBar() {
-  const { keys, open, openDoc } = useRef_();
+  const { keys, labels, open, openDoc } = useRef_();
   return (
     <nav className={s.refbar} aria-label="Berkas penugasan">
       <span className={s.refbarLabel}>Berkas penugasan</span>
@@ -110,7 +115,7 @@ export function RefBar() {
           onClick={() => openDoc(k)}
         >
           <Icon name={k} />
-          {REF_LABELS[k]}
+          {labels[k]}
         </button>
       ))}
       <small>Dibuka di panel samping tanpa meninggalkan halaman</small>
@@ -130,7 +135,7 @@ export function RefButton() {
 }
 
 function RefPanel() {
-  const { keys, docs, open, openDoc, openMenu, close } = useRef_();
+  const { keys, labels, docs, open, openDoc, openMenu, close } = useRef_();
   const panel = useRef<HTMLDivElement>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
@@ -177,7 +182,7 @@ function RefPanel() {
   }, [isOpen, close]);
 
   if (!open) return null;
-  const title = open === "menu" ? "Berkas penugasan" : REF_LABELS[open];
+  const title = open === "menu" ? "Berkas penugasan" : labels[open];
   return (
     <>
       <button type="button" className={s.scrim} aria-label="Tutup berkas" tabIndex={-1} onClick={close} />
@@ -205,7 +210,7 @@ function RefPanel() {
               {keys.map((k) => (
                 <button key={k} type="button" className={s.refbtn} onClick={() => openDoc(k)}>
                   <Icon name={k} />
-                  {REF_LABELS[k]}
+                  {labels[k]}
                 </button>
               ))}
             </nav>

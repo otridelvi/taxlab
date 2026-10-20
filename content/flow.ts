@@ -1,7 +1,7 @@
 import type { Factors } from "@/lib/cell";
 import type { ItemSpec } from "@/lib/items";
 import { COV, COV_B, DEMO_TEXT, MINUTES_QUESTIONS, REC_LABELS } from "./text";
-import { EWALLETS, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, MC_QUESTIONS, UNIVERSITY } from "./questions";
+import { EWALLETS, GENDER, LIKERT_LABELS, LIKERT_STATEMENTS, UNIVERSITY, mcQuestions } from "./questions";
 
 /**
  * Participant flow as configuration (FSD-Participant §4). The page shown is
@@ -141,8 +141,8 @@ const MCQ_GROUP = { id: "mcq", name: "pertanyaan" } as const;
 const LIKERT_GROUP = { id: "likert", name: "pernyataan" } as const;
 
 /** Manipulation check, part A (PLAN-06): three multiple-choice questions, no a/b/c letters. */
-const mcItems = (): ItemSpec[] =>
-  MC_QUESTIONS.map((q, i) => ({
+const mcItems = (f: Factors): ItemSpec[] =>
+  mcQuestions(f.review).map((q, i) => ({
     key: q.key,
     type: "choice" as const,
     legend: q.legend,
@@ -165,7 +165,7 @@ const likertItems = (): ItemSpec[] =>
   }));
 
 /** Flow B: both parts on one page. */
-const questionnaireItems = (): ItemSpec[] => [...mcItems(), ...likertItems()];
+const questionnaireItems = (f: Factors): ItemSpec[] => [...mcItems(f), ...likertItems()];
 
 /** Demographics and the optional incentive claim (PLAN-06 D-5…D-8). */
 const demographicItems = (): ItemSpec[] => [

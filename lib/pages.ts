@@ -25,7 +25,7 @@ export const PAGE_NAMES: Record<string, string> = {
   client_draft_r1: "Draft klien",
   rec_r1: "Rekomendasi",
   confidence_r1: "Keyakinan",
-  review: "Reviu Atasan",
+  review: "Reviu/Catatan Atasan",
   cases_intro_r2: "Instruksi kasus",
   cases_r2: "Daftar kasus",
   rec_intro_r2: "Pengantar rekomendasi",
@@ -63,7 +63,7 @@ const SECTION_BY_PAGE: Record<string, string> = {
   debriefing: "Kuesioner",
 };
 
-/** e.g. "Putaran 1 · Daftar kasus", "Berkas klien · Memo", "Reviu Atasan". */
+/** e.g. "Putaran 1 · Daftar kasus", "Berkas klien · Memo", "Reviu/Catatan Atasan". */
 export function positionLabel(pageId: string | null | undefined): string | null {
   if (!pageId) return null;
   const name = PAGE_NAMES[pageId] ?? pageId;

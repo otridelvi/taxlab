@@ -1,6 +1,15 @@
 {
-  "mc_q1": { "expl": 1, "impl": 2 },
-  "mc_q2": null,
-  "mc_q3": null,
+  "mc_q1": {
+    "expl": 1,
+    "impl": 2
+  },
+  "mc_q2": {
+    "yes": null,
+    "no": null
+  },
+  "mc_q3": {
+    "yes": null,
+    "no": null
+  },
   "cov": null
 }

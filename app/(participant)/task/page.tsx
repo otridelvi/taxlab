@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SECTION_LABELS } from "@/content/flow";
+import { SUPERVISOR_DOC } from "@/content/text";
 import { FileMap } from "@/components/participant/FileMap";
 import { FinishStep } from "@/components/participant/FinishStep";
 import { FirmShell, StudyShell, type TimerInfo } from "@/components/participant/Shell";
@@ -72,6 +73,9 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
   }
 
   const { participant, step, flow, factors } = session;
+  // The header names the supervisor page "Reviu atasan" or "Catatan atasan" like the document itself (PLAN-10).
+  const sectionLabel =
+    step.section === "review" ? SUPERVISOR_DOC[factors.review].section : SECTION_LABELS[step.section];
   const settings = await getParticipantSettings();
   const left = remainingMs(participant);
   const timer: TimerInfo =
@@ -91,7 +95,7 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
 
   if (step.kind === "finish") {
     return (
-      <FirmShell section={SECTION_LABELS[step.section]} code={participant.accessCode} timer={timer}>
+      <FirmShell section={sectionLabel} code={participant.accessCode} timer={timer}>
         {resumeNotice}
         <FinishStep />
       </FirmShell>
@@ -113,7 +117,7 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
   // Flow B: the debriefing page carries the "Survey Selesai" button itself (PLAN-05 D-12).
   if (step.ends) {
     return (
-      <FirmShell section={SECTION_LABELS[step.section]} code={participant.accessCode} timer={timer}>
+      <FirmShell section={sectionLabel} code={participant.accessCode} timer={timer}>
         {resumeNotice}
         <FinishStep page={step.id}>{view.content}</FinishStep>
       </FirmShell>
@@ -144,7 +148,7 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
 
   const body = (
     <FirmShell
-      section={SECTION_LABELS[step.section]}
+      section={sectionLabel}
       code={participant.accessCode}
       timer={timer}
       wide={isCases}
@@ -159,7 +163,12 @@ export default async function TaskPage({ searchParams }: PageProps<"/task">) {
 
   // The menu Berkas (PLAN-04) is per step: opening state and the file log reset when the step changes.
   return menu.length > 0 ? (
-    <RefProvider key={step.id} keys={menu} docs={refDocs(factors, menu, flowKind)}>
+    <RefProvider
+      key={step.id}
+      keys={menu}
+      docs={refDocs(factors, menu, flowKind)}
+      reviewLabel={SUPERVISOR_DOC[factors.review].label}
+    >
       {body}
     </RefProvider>
   ) : (

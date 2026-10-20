@@ -153,22 +153,17 @@ export function MemoDoc({ level = 1 }: { level?: 1 | 2 }) {
 }
 
 /**
- * Reviu Supervisor per cell (PLAN-09). Sel 1 (implisit + reviu spesifik) has its final text;
- * Sel 2-4 stay on the lorem ipsum placeholder until the researcher sends them.
+ * Supervisor document per cell (PLAN-09, PLAN-10): Sel 1 and 2 (specific review) get the
+ * "Reviu Supervisor", Sel 3 and 4 the "Catatan Supervisor". Only `review` matters, not the
+ * client preference. Texts live in `T.SUPERVISOR_DOC`.
  */
-function reviewContent(f: Factors): { paras: readonly string[]; points: readonly string[] } {
-  if (f.pref === "impl" && f.review === "yes") {
-    return { paras: T.REVIEW_SEL1_BODY, points: T.REVIEW_SEL1_POINTS };
-  }
-  return { paras: T.REVIEW_BODY, points: [] };
-}
-
 export function ReviewDoc({ f, level = 1 }: { f: Factors; level?: 1 | 2 }) {
-  const { paras, points } = reviewContent(f);
+  const doc = T.SUPERVISOR_DOC[f.review];
+  const List = doc.ordered ? "ol" : "ul";
   return (
     <>
-      <Kop refNo="REVIU/[NOMOR]" />
-      <DocTitle level={level}>{T.REVIEW_TITLE}</DocTitle>
+      <Kop refNo={doc.refNo} />
+      <DocTitle level={level}>{doc.title}</DocTitle>
       <dl className={s.meta}>
         <div>
           <dt>Untuk</dt>
@@ -187,14 +182,12 @@ export function ReviewDoc({ f, level = 1 }: { f: Factors; level?: 1 | 2 }) {
           <dd>{T.REVIEW_SUBJECT}</dd>
         </div>
       </dl>
-      <Paras list={paras} />
-      {points.length > 0 && (
-        <ol className={s.points}>
-          {points.map((p) => (
-            <li key={p}>{p}</li>
-          ))}
-        </ol>
-      )}
+      <Paras list={doc.body} />
+      <List className={s.points}>
+        {doc.points.map((p) => (
+          <li key={p}>{p}</li>
+        ))}
+      </List>
       <p style={{ fontStyle: "italic" }}>{T.REVIEW_FROM}</p>
     </>
   );
@@ -305,13 +298,13 @@ function Envelope({
 }
 
 /** The case instructions page (flow A, and flow B round 1 as its own page). */
-function CasesIntroBody({ round2 = false }: { round2?: boolean }) {
+function CasesIntroBody({ round2 = false, f }: { round2?: boolean; f: Factors }) {
   if (round2) {
     return (
       <>
         <div className={s.kick}>Kasus acuan</div>
         <h1 className={s.title}>Mempelajari kembali kasus acuan</h1>
-        <Paras list={T.CASES2_INTRO} />
+        <Paras list={T.cases2Intro(f.review)} />
         <div className={s.callout} style={{ margin: "8px 0 20px" }}>
           <strong className={s.lbl}>Diingatkan kembali</strong>
           {T.CASES2_REMIND}
@@ -658,7 +651,7 @@ export function stepView(
       return {
         content: (
           <Sheet>
-            <CasesIntroBody round2={step.id === "cases_intro_r2"} />
+            <CasesIntroBody round2={step.id === "cases_intro_r2"} f={f} />
           </Sheet>
         ),
       };
@@ -668,7 +661,7 @@ export function stepView(
         content: (
           <Sheet>
             <Head kick="Rekomendasi" title="Menyusun rekomendasi" />
-            <Html html={step.id === "rec_intro_r1" ? T.REC_INTRO_1 : T.REC_INTRO_2} />
+            <Html html={step.id === "rec_intro_r1" ? T.REC_INTRO_1 : T.recIntro2(f.review)} />
           </Sheet>
         ),
       };
@@ -692,7 +685,7 @@ export function stepView(
           ctx.flow === "B" && step.id === "cases_r2" ? (
             <section className={`${s.instrBanner} ${s.ui}`}>
               <strong className={s.lbl}>Instruksi</strong>
-              <Paras list={T.CASES2_INTRO} />
+              <Paras list={T.cases2Intro(f.review)} />
               <p>{T.CASES2_REMIND}</p>
               <p>{T.ATTN}</p>
               <p>{T.CASES2_FOOT}</p>
@@ -716,7 +709,7 @@ export function stepView(
           content: (
             <Sheet>
               <Head kick="Rekomendasi" title="Menyusun rekomendasi" />
-              <Html html={step.id === "rec_r1" ? T.REC_INTRO_1 : T.REC_INTRO_2} />
+              <Html html={step.id === "rec_r1" ? T.REC_INTRO_1 : T.recIntro2(f.review)} />
               <h2 className={s.h2}>Usulan biaya menurut draft klien</h2>
               <p>Berikut ditampilkan kembali usulan biaya berdasarkan draft yang disiapkan klien.</p>
               <Ledger rows={T.COSTS_DRAFT} />
@@ -744,16 +737,16 @@ export function stepView(
           content: (
             <Envelope
               target="review"
-              title={T.ENVELOPE.review.title}
-              subject={T.ENVELOPE.review.subject}
-              intro={[T.ENVELOPE.review.intro]}
-              button={T.ENVELOPE.review.button}
+              title={T.SUPERVISOR_DOC[f.review].title}
+              subject={T.SUPERVISOR_DOC[f.review].envelope.subject}
+              intro={[T.SUPERVISOR_DOC[f.review].envelope.intro]}
+              button={T.SUPERVISOR_DOC[f.review].envelope.button}
             />
           ),
         };
       }
       return {
-        footNote: T.REVIEW_FOOT,
+        footNote: T.SUPERVISOR_DOC[f.review].foot,
         content: (
           <Sheet>
             <ReviewDoc f={f} />

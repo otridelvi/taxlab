@@ -3,8 +3,14 @@
  * codebook export (PLAN-07). Option numbers follow the order shown on screen.
  */
 
-/** Manipulation check, part A: three multiple-choice questions. */
-export const MC_QUESTIONS = [
+const DOC = { yes: "Reviu atasan", no: "Catatan atasan" } as const;
+
+/**
+ * Manipulation check, part A: three multiple-choice questions. Questions 2 and 3 name the
+ * supervisor document like the participant saw it: "Reviu atasan" (Sel 1, 2) or "Catatan atasan"
+ * (Sel 3, 4); options are the same for now (PLAN-10 O-1).
+ */
+export const mcQuestions = (review: "yes" | "no") => [
   {
     key: "mc_q1",
     legend: "Dalam pertemuan dengan manajemen klien, mereka menyatakan bahwa (pilih salah satu):",
@@ -17,7 +23,7 @@ export const MC_QUESTIONS = [
   {
     key: "mc_q2",
     legend:
-      "Dari Reviu atasan yang anda terima, penyelia/supervisor anda menyatakan bahwa (pilih salah satu):",
+      `Dari ${DOC[review]} yang anda terima, penyelia/supervisor anda menyatakan bahwa (pilih salah satu):`,
     options: [
       "Anda Pastikan Apakah strategi dan dasar hukum yang digunakan sudah aman dan sesuai yurisprudensi",
       "Anda harus mencantumkan identitas, mendapatkan balikan secara formal dan mendapatkan komentar dari atasan terhadap pekerjaan yang anda lakukan",
@@ -27,7 +33,7 @@ export const MC_QUESTIONS = [
   {
     key: "mc_q3",
     legend:
-      "Dari Reviu atasan yang diterima, penyelia/supervisor anda meminta anda untuk (pilih salah satu):",
+      `Dari ${DOC[review]} yang diterima, penyelia/supervisor anda meminta anda untuk (pilih salah satu):`,
     options: [
       "Mempelajari pastikan Apakah proses, metode, dan rujukan hukumnya sudah sesuai dengan aturan main yang benar",
       "[Placeholder opsi 2 · menunggu peneliti]",
@@ -35,6 +41,9 @@ export const MC_QUESTIONS = [
     ],
   },
 ] as const;
+
+/** Admin views (codebook, participant detail) show the reviu wording. */
+export const MC_QUESTIONS = mcQuestions("yes");
 
 /** Part B: four statements on a 1–5 agreement scale (1–2 client preference, 3–4 supervisor review). */
 export const LIKERT_STATEMENTS = [

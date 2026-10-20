@@ -61,6 +61,6 @@ test("request schemas", () => {
 test("position labels", () => {
   assert.equal(positionLabel("cases_r2"), "Putaran 2 · Daftar kasus");
   assert.equal(positionLabel("memo"), "Pembuka · Memo");
-  assert.equal(positionLabel("review"), "Reviu Atasan");
+  assert.equal(positionLabel("review"), "Reviu/Catatan Atasan");
   assert.equal(positionLabel(null), null);
 });

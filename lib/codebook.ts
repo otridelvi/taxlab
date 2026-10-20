@@ -85,7 +85,7 @@ function roundVars(r: 1 | 2): CodebookVar[] {
     ["minutes", "Berita Acara"],
     ["memo", "Memo"],
   ];
-  if (r === 2) docs.push(["review", "Reviu Atasan"]);
+  if (r === 2) docs.push(["review", "Reviu/Catatan Atasan"]);
   for (const [doc, label] of docs) {
     out.push(
       def(`ref_${doc}_n${s}`, `${g} · referensi`, `Berapa kali ${label} dibuka dari menu Berkas`, "int", "jumlah", "event ref_open", r),
@@ -122,7 +122,7 @@ export function buildCodebook(): CodebookVar[] {
     def("code", "Identitas", "Kode akses partisipan", "text", "TX-XXXX-XXXX", "participants"),
     def("cell", "Identitas", "Sel perlakuan", "int", "1 = implisit/reviu spesifik, 2 = eksplisit/reviu spesifik, 3 = implisit/reviu tidak spesifik, 4 = eksplisit/reviu tidak spesifik", "participants"),
     def("pref", "Identitas", "Faktor preferensi klien", "text", "impl, expl", "participants.cell"),
-    def("review", "Identitas", "Faktor reviu atasan", "text", "yes (spesifik), no (tidak spesifik)", "participants.cell"),
+    def("review", "Identitas", "Faktor reviu atasan", "text", "yes (spesifik; dokumen Reviu Supervisor), no (tidak spesifik; dokumen Catatan Supervisor)", "participants.cell"),
     def("batch", "Identitas", "Label batch kode", "text", "teks", "batches"),
     def("status", "Identitas", "Status partisipan", "text", "not_started, in_progress, completed, timed_out, cancelled", "participants"),
     def("content_version", "Identitas", "Versi konten yang dilihat partisipan", "text", "teks", "participants"),
@@ -133,13 +133,13 @@ export function buildCodebook(): CodebookVar[] {
     def("started_at", "Waktu", "Waktu sesi dimulai", "time", "ISO 8601 +07:00", "participants"),
     def("r1_start_at", "Waktu", "Awal putaran 1", "time", "ISO 8601 +07:00", "event round_start"),
     def("r1_end_at", "Waktu", "Akhir putaran 1", "time", "ISO 8601 +07:00", "event round_end"),
-    def("review_end_at", "Waktu", "Akhir halaman Reviu Atasan (awal putaran 2)", "time", "ISO 8601 +07:00", "event round_start"),
+    def("review_end_at", "Waktu", "Akhir halaman Reviu/Catatan Atasan (awal putaran 2)", "time", "ISO 8601 +07:00", "event round_start"),
     def("r2_end_at", "Waktu", "Akhir putaran 2", "time", "ISO 8601 +07:00", "event round_end"),
     def("finished_at", "Waktu", "Waktu sesi selesai", "time", "ISO 8601 +07:00", "participants"),
     def("duration_total_s", "Waktu", "Total durasi (persetujuan sampai selesai)", "int", SEC, "dihitung"),
     def("duration_intro_s", "Waktu", "Durasi bagian pembuka", "int", SEC, "dihitung"),
     def("duration_r1_s", "Waktu", "Durasi putaran 1", "int", SEC, "dihitung"),
-    def("duration_review_s", "Waktu", "Durasi antara putaran 1 dan 2 (Reviu Atasan)", "int", SEC, "dihitung"),
+    def("duration_review_s", "Waktu", "Durasi antara putaran 1 dan 2 (Reviu/Catatan Atasan)", "int", SEC, "dihitung"),
     def("duration_r2_s", "Waktu", "Durasi putaran 2", "int", SEC, "dihitung"),
     def("duration_quest_s", "Waktu", "Durasi kuesioner dan penutup", "int", SEC, "dihitung"),
     def("timed_out", "Waktu", "Waktu penugasan habis", "flag", YN, "participants"),
@@ -157,7 +157,7 @@ export function buildCodebook(): CodebookVar[] {
   );
   push(...recVars(1));
   push(
-    def("review_dur_s", "Reviu Atasan", "Waktu baca halaman Reviu Atasan (alur A)", "int", SEC, "event page_view/page_leave"),
+    def("review_dur_s", "Reviu/Catatan Atasan", "Waktu baca halaman Reviu/Catatan Atasan (alur A)", "int", SEC, "event page_view/page_leave"),
     def("memo_read_s", "Alur B", "Waktu baca memo (buka berkas sampai pindah halaman, dikurangi tab tersembunyi; alur B)", "int", SEC, "event doc_open/page_leave"),
     def("memo_gap_s", "Alur B", "Jeda dari halaman memo tampil sampai memo dibuka (alur B)", "int", SEC, "event page_view/doc_open"),
     def("review_read_s", "Alur B", "Waktu baca reviu atasan (alur B)", "int", SEC, "event doc_open/page_leave"),
@@ -178,7 +178,7 @@ export function buildCodebook(): CodebookVar[] {
     def("cases_opened_delta", "Perubahan", "Kasus dibuka: putaran 2 − putaran 1", "int", "jumlah", "dihitung"),
   );
   MC_QUESTIONS.forEach((q, i) =>
-    push(def(`mc_q${i + 1}`, "Cek manipulasi", stripHtml(q.legend), "int", options(q.options), "halaman Cek manipulasi")),
+    push(def(`mc_q${i + 1}`, "Cek manipulasi", stripHtml(q.legend) + (i > 0 ? " (Sel 3 dan 4: \"Catatan atasan\")" : ""), "int", options(q.options), "halaman Cek manipulasi")),
   );
   LIKERT_STATEMENTS.forEach((st, i) =>
     push(def(`mc_likert${i + 1}`, "Cek manipulasi", st, "int", options(LIKERT_LABELS), "halaman Cek manipulasi")),

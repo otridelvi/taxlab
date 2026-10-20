@@ -304,7 +304,7 @@ export function DetailView(props: Props) {
                   ["facts", "Fakta Klien"],
                   ["minutes", "Berita Acara"],
                   ["memo", "Memo"],
-                  ["review", "Reviu Atasan"],
+                  ["review", "Reviu/Catatan Atasan"],
                 ] as const
               ).map(([k, label]) => (
                 <tr key={k}>
@@ -321,7 +321,7 @@ export function DetailView(props: Props) {
         <p className={styles.foot}>
           {flowB
             ? `Alur B · memo: jeda ${durationText(num(row.memo_gap_s))}, dibaca ${durationText(num(row.memo_read_s))} · reviu: jeda ${durationText(num(row.review_gap_s))}, dibaca ${durationText(num(row.review_read_s))}.`
-            : `Alur A · waktu baca halaman Reviu Atasan: ${durationText(num(row.review_dur_s))}.`}
+            : `Alur A · waktu baca halaman Reviu/Catatan Atasan: ${durationText(num(row.review_dur_s))}.`}
         </p>
       </section>
 

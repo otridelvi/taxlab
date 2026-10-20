@@ -21,7 +21,7 @@ import {
 } from "./participant-helpers";
 
 /**
- * PLAN-05 · flow B (Opsi B): scenarios PB-3 … PB-21 (PB-1/PB-2 are unit tests). Participants log
+ * PLAN-05 · flow B (Opsi B): scenarios PB-3 … PB-24 (PB-1/PB-2 are unit tests). Participants log
  * in through the UI on flow B, are placed on the step under test with jumpTo(), and PB-18 walks
  * the whole flow by clicking.
  */
@@ -323,9 +323,9 @@ test.describe("PLAN-05 · flow B", () => {
     await here();
     await answerConfidence(page, 60);
     await nextButton(page).click();
-    await expect(openButton(page, "Buka reviu")).toBeVisible(); // review (closed)
+    await expect(openButton(page, "Buka catatan")).toBeVisible(); // catatan (closed)
     await here();
-    await openButton(page, "Buka reviu").click();
+    await openButton(page, "Buka catatan").click();
     await nextButton(page).click();
 
     await expect(heading(page, "Daftar kasus acuan")).toBeVisible(); // cases_r2, empty
@@ -428,5 +428,67 @@ test.describe("PLAN-05 · flow B", () => {
     await jumpTo(code, "questionnaire");
     await page.goto("/task");
     expect(await noOverflow()).toBe(true);
+  });
+
+  // PLAN-10: Reviu Supervisor (Sel 1, 2) vs Catatan Supervisor (Sel 3, 4).
+  test("PB-22 Sel 4: Catatan Supervisor arrives closed; one bullet; the word 'reviu' never appears", async ({
+    page,
+  }) => {
+    const code = await startAt(page, 4, "review");
+    await expect(heading(page, "Catatan Supervisor")).toBeVisible();
+    await expect(page.getByText("Catatan atasan", { exact: true })).toBeVisible(); // header section label
+    await expect(page.getByText("Berkas masuk")).toBeVisible();
+    await expect(nextButton(page)).toBeDisabled();
+    await expect(page.locator("main")).not.toContainText(/reviu/i);
+    await openButton(page, "Buka catatan").click();
+    await waitForEvents(code, (rows) => rows.some((e) => e.type === "doc_open" && e.target === "review"));
+    const main = page.locator("main");
+    await expect(main.getByText(/Catatan ini dapat dibuka kembali melalui menu Berkas/)).toBeVisible();
+    await expect(main.getByText("Lakukan pekerjaan secara seksama sesuai kode etik profesi.")).toBeVisible();
+    await expect(main.locator("ul li")).toHaveCount(1);
+    await expect(main.locator("ol li")).toHaveCount(0);
+    await expect(main).not.toContainText(/reviu|email|yurisprudensi|lorem/i);
+    await nextButton(page).click(); // → cases_r2
+    const nav = page.getByRole("navigation", { name: "Berkas penugasan" });
+    await expect(nav).toContainText("Catatan Supervisor");
+    await expect(nav).not.toContainText("Reviu");
+    await nav.getByRole("button", { name: "Catatan Supervisor" }).click();
+    await expect(page.getByRole("dialog").getByRole("heading", { level: 2, name: "Catatan Supervisor" })).toBeVisible();
+    await expect(page.getByRole("dialog")).toContainText("CATATAN/[NOMOR]");
+  });
+
+  test("PB-23 Sel 3: round 2 banner, recommendation intro and manipulation check say 'catatan'", async ({
+    page,
+  }) => {
+    const code = await startAt(page, 3, "review");
+    await openButton(page, "Buka catatan").click();
+    await nextButton(page).click();
+    await expect(page.getByText(/catatan oleh supervisor, silakan anda pelajari kembali/)).toBeVisible();
+    await expect(page.locator("main")).not.toContainText(/reviu/i);
+    await jumpTo(code, "rec_r2");
+    await page.goto("/task");
+    await expect(page.locator("main").getByText(/Berdasarkan catatan dari supervisor yang anda terima/)).toBeVisible();
+    await expect(page.locator("main")).not.toContainText(/reviu/i);
+    await jumpTo(code, "questionnaire");
+    await page.goto("/task");
+    await expect(page.getByText(/Dari Catatan atasan yang anda terima/)).toBeVisible();
+    await expect(page.getByText(/Dari Catatan atasan yang diterima/)).toBeVisible();
+    await expect(page.locator("main")).not.toContainText(/Reviu atasan/);
+  });
+
+  test("PB-24 Sel 2: Berita Acara Eksplisit without 'akuisisi', and the final Reviu text (no lorem ipsum)", async ({
+    page,
+  }) => {
+    const code = await startAt(page, 2, "minutes");
+    await expect(page.locator("main").getByText(/rencana pengembangan usaha akan lebih mudah terealisasi/)).toBeVisible();
+    await expect(page.locator("main")).not.toContainText(/akuisisi/i);
+    await jumpTo(code, "review");
+    await page.goto("/task");
+    await expect(heading(page, "Reviu Supervisor")).toBeVisible();
+    await openButton(page, "Buka reviu").click();
+    const main = page.locator("main");
+    await expect(main.locator("ol li")).toHaveCount(5);
+    await expect(main.getByText(/membaca reviu ini/)).toBeVisible();
+    await expect(main).not.toContainText(/lorem|menunggu materi/i);
   });
 });

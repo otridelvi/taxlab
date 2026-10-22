@@ -56,25 +56,19 @@ test("PR-4 no placeholder text is left in the participant texts (Sel 2-4 no long
   assert.match(JSON.stringify(T.MIN_EXPL), /rencana pengembangan usaha akan lebih mudah/);
 });
 
-test("PR-5 manipulation check legends name the document; options and admin view unchanged", () => {
-  const yes = mcQuestions("yes");
-  const no = mcQuestions("no");
-  assert.match(yes[1].legend, /Dari Reviu atasan yang anda terima/);
-  assert.match(no[1].legend, /Dari Catatan atasan yang anda terima/);
-  assert.match(yes[2].legend, /Dari Reviu atasan yang diterima/);
-  assert.match(no[2].legend, /Dari Catatan atasan yang diterima/);
-  assert.deepEqual(yes.map((q) => q.options), no.map((q) => q.options));
-  assert.equal(yes[0].legend, no[0].legend);
-  assert.deepEqual(MC_QUESTIONS, yes);
+test("PR-5 manipulation check legends say 'Reviu atau Catatan' for every cell", () => {
+  assert.match(MC_QUESTIONS[1].legend, /^Dari Reviu atau Catatan yang anda terima/);
+  assert.match(MC_QUESTIONS[2].legend, /^Dari Reviu atau Catatan atasan yang diterima/);
+  assert.deepEqual(mcQuestions("yes"), mcQuestions("no"));
+  assert.equal(MC_QUESTIONS[2].options.length, 3);
+  assert.ok(!MC_QUESTIONS.some((q) => q.options.some((o) => /placeholder/i.test(o))));
   for (const flow of [FLOW_A, FLOW_B]) {
     const step = flow.find((s) => s.id === "mc_choice" || s.id === "questionnaire")!;
     const legends = (cell: number) =>
       itemsForStep(step, cellFactors(cell)).flatMap((i) => (i.type === "choice" ? [i.legend] : []));
-    assert.ok(legends(1).some((l) => l.includes("Reviu atasan")));
-    assert.ok(legends(2).some((l) => l.includes("Reviu atasan")));
-    assert.ok(legends(3).some((l) => l.includes("Catatan atasan")));
-    assert.ok(legends(4).some((l) => l.includes("Catatan atasan")));
-    assert.ok(!legends(3).some((l) => l.includes("Reviu atasan")));
+    for (const cell of [1, 2, 3, 4]) {
+      assert.ok(legends(cell).some((l) => l.includes("Reviu atau Catatan")));
+    }
   }
 });
 

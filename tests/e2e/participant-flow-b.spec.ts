@@ -457,7 +457,7 @@ test.describe("PLAN-05 · flow B", () => {
     await expect(page.getByRole("dialog")).toContainText("CATATAN/[NOMOR]");
   });
 
-  test("PB-23 Sel 3: round 2 banner, recommendation intro and manipulation check say 'catatan'", async ({
+  test("PB-23 Sel 3: round 2 banner, recommendation intro and manipulation check say 'catatan' (the check itself says 'Reviu atau Catatan')", async ({
     page,
   }) => {
     const code = await startAt(page, 3, "review");
@@ -471,9 +471,8 @@ test.describe("PLAN-05 · flow B", () => {
     await expect(page.locator("main")).not.toContainText(/reviu/i);
     await jumpTo(code, "questionnaire");
     await page.goto("/task");
-    await expect(page.getByText(/Dari Catatan atasan yang anda terima/)).toBeVisible();
-    await expect(page.getByText(/Dari Catatan atasan yang diterima/)).toBeVisible();
-    await expect(page.locator("main")).not.toContainText(/Reviu atasan/);
+    await expect(page.getByText(/Dari Reviu atau Catatan yang anda terima/)).toBeVisible();
+    await expect(page.getByText(/Dari Reviu atau Catatan atasan yang diterima/)).toBeVisible();
   });
 
   test("PB-24 Sel 2: Berita Acara Eksplisit without 'akuisisi', and the final Reviu text (no lorem ipsum)", async ({

@@ -178,7 +178,7 @@ export function buildCodebook(): CodebookVar[] {
     def("cases_opened_delta", "Perubahan", "Kasus dibuka: putaran 2 − putaran 1", "int", "jumlah", "dihitung"),
   );
   MC_QUESTIONS.forEach((q, i) =>
-    push(def(`mc_q${i + 1}`, "Cek manipulasi", stripHtml(q.legend) + (i > 0 ? " (Sel 3 dan 4: \"Catatan atasan\")" : ""), "int", options(q.options), "halaman Cek manipulasi")),
+    push(def(`mc_q${i + 1}`, "Cek manipulasi", stripHtml(q.legend), "int", options(q.options), "halaman Cek manipulasi")),
   );
   LIKERT_STATEMENTS.forEach((st, i) =>
     push(def(`mc_likert${i + 1}`, "Cek manipulasi", st, "int", options(LIKERT_LABELS), "halaman Cek manipulasi")),

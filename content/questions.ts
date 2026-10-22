@@ -3,14 +3,12 @@
  * codebook export (PLAN-07). Option numbers follow the order shown on screen.
  */
 
-const DOC = { yes: "Reviu atasan", no: "Catatan atasan" } as const;
-
 /**
  * Manipulation check, part A: three multiple-choice questions. Questions 2 and 3 name the
- * supervisor document like the participant saw it: "Reviu atasan" (Sel 1, 2) or "Catatan atasan"
- * (Sel 3, 4); options are the same for now (PLAN-10 O-1).
+ * supervisor document as "Reviu atau Catatan" for every cell (researcher wording, 22 Oct 2026),
+ * so the legends no longer vary with the review factor.
  */
-export const mcQuestions = (review: "yes" | "no") => [
+export const MC_QUESTIONS = [
   {
     key: "mc_q1",
     legend: "Dalam pertemuan dengan manajemen klien, mereka menyatakan bahwa (pilih salah satu):",
@@ -23,7 +21,7 @@ export const mcQuestions = (review: "yes" | "no") => [
   {
     key: "mc_q2",
     legend:
-      `Dari ${DOC[review]} yang anda terima, penyelia/supervisor anda menyatakan bahwa (pilih salah satu):`,
+      "Dari Reviu atau Catatan yang anda terima, penyelia/supervisor anda menyatakan bahwa (pilih salah satu):",
     options: [
       "Anda Pastikan Apakah strategi dan dasar hukum yang digunakan sudah aman dan sesuai yurisprudensi",
       "Anda harus mencantumkan identitas, mendapatkan balikan secara formal dan mendapatkan komentar dari atasan terhadap pekerjaan yang anda lakukan",
@@ -33,24 +31,24 @@ export const mcQuestions = (review: "yes" | "no") => [
   {
     key: "mc_q3",
     legend:
-      `Dari ${DOC[review]} yang diterima, penyelia/supervisor anda meminta anda untuk (pilih salah satu):`,
+      "Dari Reviu atau Catatan atasan yang diterima, penyelia/supervisor anda meminta anda untuk (pilih salah satu):",
     options: [
-      "Mempelajari pastikan Apakah proses, metode, dan rujukan hukumnya sudah sesuai dengan aturan main yang benar",
-      "[Placeholder opsi 2 · menunggu peneliti]",
-      "[Placeholder opsi 3 · menunggu peneliti]",
+      "Meminta anda memastikan proses, metode, dan rujukan hukumnya sudah sesuai dengan aturan main yang benar.",
+      "Memastikan anda memberikan penilaian terhadap setiap isu perpajakan klien",
+      "Memberikan saran tertulis untuk rekomendasi yang anda sampaikan kepada klien secara langsung",
     ],
   },
 ] as const;
 
-/** Admin views (codebook, participant detail) show the reviu wording. */
-export const MC_QUESTIONS = mcQuestions("yes");
+/** Same questions for every cell; kept as a function so callers stay unchanged. */
+export const mcQuestions = (_review?: "yes" | "no") => MC_QUESTIONS;
 
 /** Part B: four statements on a 1–5 agreement scale (1–2 client preference, 3–4 supervisor review). */
 export const LIKERT_STATEMENTS = [
   "Klien anda menekankan bahwa perlakuan pajak untuk akun-akun yang mereka usulkan agar sesuai dengan usulan pada draft yang mereka sampaikan",
   "Klien anda menyatakan bahwa kontrak penugasan jangka panjang sangat tergantung kepada rekomendasi yang anda berikan",
-  "Atasan anda menyatakan bahwa usulan anda dan feedback akan disampaikan melalui email",
-  "Diskusi lebih lanjut dengan anggota tim lain dilakukan setelah anda mempelajari balikan (feedback) dari atasan anda",
+  "Atasan anda menyatakan bahwa angka yang anda usulkan sudah benar, baik dari sisi regulasi maupun laporan (angka-angka) yang menjadi rujukan",
+  "Atasan anda menyatakan pada kertas reviu agar catatan perbaikan (review notes), revisi kertas kerja, atau penyesuaian angka/kebijakan akan disampaikan melalui email anda",
 ] as const;
 
 export const LIKERT_LABELS = [
@@ -63,7 +61,7 @@ export const LIKERT_LABELS = [
 
 /** Demographics: stored value = 1-based index of the option. */
 export const GENDER = ["L", "P"] as const;
-export const UNIVERSITY = ["UNAND", "UGM"] as const;
+export const UNIVERSITY = ["UNAND", "UGM", "UNP"] as const;
 
 /** E-wallets for the incentive claim (PERTANYAAN D4). `value` is what `contacts.ewallet` stores. */
 export const EWALLETS = [

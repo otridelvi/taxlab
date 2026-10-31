@@ -29,5 +29,5 @@ test("only admin paths are allowed after login", () => {
   assert.equal(safeNextPath("//evil.example/admin"), "/admin");
   assert.equal(safeNextPath("/admin/login"), "/admin");
   assert.equal(safeNextPath("/admin/login?next=/admin"), "/admin");
-  assert.equal(safeNextPath("/masuk"), "/admin");
+  assert.equal(safeNextPath("/login"), "/admin");
 });

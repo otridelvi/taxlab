@@ -1,0 +1,53 @@
+# Keeps the free-tier Supabase projects awake (they pause after about a week without activity).
+# Runs every 5 days and can be started by hand (Actions → Keep-alive → Run workflow).
+#
+# Scheduled workflows only run from the default branch (main). Settings → Secrets and variables → Actions:
+#   HEALTHCHECK_URL_SIT    https://taxlab-sit.vercel.app       (no trailing slash)
+#   HEALTHCHECK_TOKEN_SIT  same value as HEALTHCHECK_TOKEN in the Vercel Preview env
+#   HEALTHCHECK_URL_PROD / HEALTHCHECK_TOKEN_PROD  later, when Production exists (skipped while empty)
+name: Keep-alive
+
+on:
+  schedule:
+    - cron: "0 0 */5 * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SIT_URL: ${{ secrets.HEALTHCHECK_URL_SIT }}
+      SIT_TOKEN: ${{ secrets.HEALTHCHECK_TOKEN_SIT }}
+      PROD_URL: ${{ secrets.HEALTHCHECK_URL_PROD }}
+      PROD_TOKEN: ${{ secrets.HEALTHCHECK_TOKEN_PROD }}
+    steps:
+      - name: Ping environments
+        shell: bash
+        run: |
+          failed=0
+          pinged=0
+          ping_env() {
+            local name="$1" url="$2" token="$3"
+            if [ -z "$url" ] || [ -z "$token" ]; then
+              echo "::notice::$name skipped (URL or token not set)"
+              return
+            fi
+            pinged=$((pinged + 1))
+            if curl --fail --silent --show-error --retry 3 --retry-delay 10 --max-time 30 \
+              -H "Authorization: Bearer $token" "${url%/}/api/health"; then
+              echo " <- $name ok"
+            else
+              echo "::error::$name health check failed"
+              failed=1
+            fi
+          }
+          ping_env SIT "$SIT_URL" "$SIT_TOKEN"
+          ping_env PROD "$PROD_URL" "$PROD_TOKEN"
+          if [ "$pinged" -eq 0 ]; then
+            echo "::error::No environment configured"
+            failed=1
+          fi
+          exit $failed

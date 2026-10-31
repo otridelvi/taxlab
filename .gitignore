@@ -36,3 +36,6 @@ supabase/.branches/
 # Tests
 /test-results/
 /playwright-report/
+
+# Berkas keluaran sesi Claude (screenshot, dll.)
+/Claude outputs/

@@ -22,26 +22,24 @@ export type CurrentAdmin = {
  * same user, and an active row in `admins`.
  */
 export const getCurrentAdmin = cache(async (): Promise<CurrentAdmin | null> => {
-  const supabase = await createAuthClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
   const cookieStore = await cookies();
   const session = await verifyAdminSession(
     cookieStore.get(ADMIN_SESSION_COOKIE)?.value,
     serverEnv().SESSION_SECRET,
   );
-  if (!session || session.sub !== user.id) return null;
+  if (!session) return null;
 
-  const admin = await getAdminById(user.id);
+  // Verify the Supabase token and load the admin row in parallel.
+  const supabase = await createAuthClient();
+  const [{ data }, admin] = await Promise.all([supabase.auth.getClaims(), getAdminById(session.sub)]);
+  const claims = data?.claims;
+  if (!claims || claims.sub !== session.sub) return null;
   if (!admin || !admin.active) return null;
 
   return {
     id: admin.id,
     name: admin.name,
-    email: user.email ?? "",
+    email: typeof claims.email === "string" ? claims.email : "",
     role: admin.role,
     loginAt: session.loginAt,
   };

@@ -7,6 +7,8 @@ const serverEnvSchema = z.object({
   APP_ENV: z.enum(["sit", "production"]),
   APP_BASE_URL: z.url(),
   SESSION_SECRET: z.string().min(32, "must be at least 32 characters"),
+  /** Bearer token for GET /api/health (keep-alive). Without it the endpoint always answers 401. */
+  HEALTHCHECK_TOKEN: z.string().min(16, "must be at least 16 characters").optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

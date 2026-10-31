@@ -17,10 +17,10 @@ export type DashboardSettings = {
 };
 
 export const CELL_LABELS: Record<number, string> = {
-  1: "Implisit · Lemah",
-  2: "Eksplisit · Lemah",
-  3: "Implisit · Kuat",
-  4: "Eksplisit · Kuat",
+  1: "Implisit · Reviu spesifik",
+  2: "Eksplisit · Reviu spesifik",
+  3: "Implisit · Reviu tidak spesifik",
+  4: "Eksplisit · Reviu tidak spesifik",
 };
 
 export type DashboardTotals = {

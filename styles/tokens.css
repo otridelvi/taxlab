@@ -1,40 +1,47 @@
 /*
- * Design tokens · theme "Arsip" (temporary until the final theme is chosen).
+ * Design tokens · theme B "Grafit" (chosen 8 Oct 2026).
  * Switching theme = changing these values only.
  */
 :root {
   /* Surfaces */
-  --color-page: #f4f2ec;
+  --color-page: #f2f3f4;
   --color-surface: #ffffff;
-  --color-surface-muted: #faf9f6;
-  --color-surface-hover: #ece9e1;
+  --color-surface-muted: #f7f8f9;
+  --color-surface-hover: #e6e9ec;
+  --color-accent-tint: #e1ecec;
 
   /* Ink */
-  --color-ink: #1c1c1a;
-  --color-ink-soft: #2b2a26;
-  --color-ink-muted: #55524a;
-  --color-ink-faint: #77736a;
+  --color-ink: #14171a;
+  --color-ink-soft: #23282d;
+  --color-ink-muted: #4b525a;
+  --color-ink-faint: #6b737b;
 
   /* Lines */
-  --color-border: #d9d4c7;
-  --color-border-soft: #ece9e1;
-  --color-border-strong: #8a867b;
+  --color-border: #dadde1;
+  --color-border-soft: #eceef0;
+  --color-border-strong: #8c939a;
 
   /* Accent */
-  --color-accent: #1f3a5f;
-  --color-accent-hover: #0f223a;
+  --color-accent: #1d4e4f;
+  --color-accent-hover: #0f3233;
   --color-on-accent: #ffffff;
 
   /* Status (always paired with a text label) */
   --color-success: #2f6b3a;
+  --color-success-tint: #e3efe5;
   --color-warning: #8a5a12;
-  --color-warning-ink: #6b4610;
+  --color-warning-ink: #5e3b0c;
+  --color-warning-tint: #fbefd9;
   --color-danger: #7a1c1c;
+  --color-danger-ink: #8a1c1c;
+  --color-danger-tint: #f6e3e3;
+  --color-disabled: #c9ced3;
+  --color-disabled-ink: #30363c;
 
   /* Admin header per environment */
-  --color-admin-bar: #1c1c1a;
-  --color-admin-bar-ink: #f4f2ec;
-  --color-admin-bar-muted: #d9d4c7;
+  --color-admin-bar: #14171a;
+  --color-admin-bar-ink: #f2f3f4;
+  --color-admin-bar-muted: #c9ced3;
   --color-env-production: #e0b65a;
   --color-env-production-ink: #f1d79b;
   --color-admin-bar-sit: #1b2a3a;
@@ -42,13 +49,14 @@
   --color-env-sit-ink: #cfe6f8;
 
   /* Type */
-  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-sans: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   /* Shape & spacing */
-  --radius-sm: 2px;
-  --radius-md: 3px;
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
